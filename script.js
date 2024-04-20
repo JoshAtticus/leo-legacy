@@ -88,7 +88,7 @@ function main() {
                         <input type='password' id='passinput' placeholder='Password' class='login-input text' aria-label="password input">
                         <input type='button' id='login' value='Log in' class='login-input button' onclick='login(document.getElementById("userinput").value, document.getElementById("passinput").value)' aria-label="sign up">
                         <input type='button' id='signup' value='Sign up' class='login-input button' onclick='signup(document.getElementById("userinput").value, document.getElementById("passinput").value)' aria-label="log in">
-                        <small>This client was made by eri :></small>
+                        <small>meo made by eri; leo made by JoshAtticus</small>
                         <div id='msgs'></div>
                         </div>
                         <div class='footer'>
@@ -759,7 +759,7 @@ function loadtheme() {
 
 function sharepost() {
     const postId = event.target.closest('.post').id;
-    window.open(`https://meo-32r.pages.dev/share?id=${postId}`, '_blank');
+    window.open(`https://leo.atticat.tech/share?id=${postId}`, '_blank');
 }
 
 function login(user, pass) {
@@ -1227,7 +1227,7 @@ function loadgeneral() {
             </div>
             <h3>About</h3>
             <div class="stg-section">
-            <span>meo v1.20</span>
+            <span>leo v1.20</span>
             </div>
             </div>
             `;
@@ -1319,7 +1319,7 @@ async function fetchplugins() {
     try {
     // remember to bring this back when final
     //    const response = await fetch('./plugins.json');
-        const response = await fetch('https://meo.atticat.tech/plugins.json');
+        const response = await fetch('https://leo.atticat.tech/plugins.json');
         const pluginsdata = await response.json();
         return pluginsdata;
     } catch (error) {
@@ -2681,7 +2681,7 @@ function mdlpingusr(event) {
 
 function mdlshare(event) {
     const postId = event.target.closest('.modal').id;
-    window.open(`https://meo-32r.pages.dev/share?id=${postId}`, '_blank');
+    window.open(`https://leo.atticat.tech/share?id=${postId}`, '_blank');
     closemodal();
 }
 

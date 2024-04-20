@@ -6,28 +6,10 @@
     "script": "https://update.greasyfork.org/scripts/485845/Meo%20Glass.user.js"
   },
   {
-    "name": "Unexpected End",
-    "creator": "Bloctans",
-    "description": "unexpected end of JSON input",
-    "script": "plugins/unexpectedend.js"
-  },
-  {
-    "name": "WorseMeower Theme",
-    "creator": "Bloctans",
-    "description": "Worsen your theme significantly",
-    "script": "plugins/worsetheme.js"
-  },
-  {
     "name": "Meower Turn",
     "creator": "JoshAtticus",
     "description": "Make Meower turn on keypress",
     "script": "https://update.greasyfork.org/scripts/486561/Meower%20Turn.user.js"
-  },
-  {
-    "name": "Hell Meo",
-    "creator": "Roblox888i235",
-    "description": "Turns your meo into living hell (WARNING: BAD!!!)",
-    "script": "plugins/hellmeo.js"
   },
   {
     "name": "Meower Rotate",
