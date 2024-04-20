@@ -1,2 +1,2 @@
-# meo with plugins
+# leo
 Meo Experimental with plugins re-enabled :)
