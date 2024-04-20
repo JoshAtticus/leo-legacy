@@ -1188,7 +1188,7 @@ function loadstgs() {
     <div class='nav-top'>
     <input type='button' class='navigation-button button' id='submit' value='General' onclick='loadgeneral()'>
     <input type='button' class='navigation-button button' id='submit' value='Appearance' onclick='loadappearance()'>
-    <input type='button' class='navigation-button button' id='submit' value='Plugins' onclick='loadplugins()'>
+    <input type='button' class='navigation-button button' id='submit' value='Plugins (Beta)' onclick='loadplugins()'>
     </div>
     <input type='button' class='navigation-button button' id='submit' value='Go Home' onclick='loadhome()'>
     </div>
@@ -1259,8 +1259,8 @@ async function loadplugins() {
     let pageContainer = document.getElementById("main");
     let settingsContent = `
         <div class="settings">
-            <h1>Plugins</h1>
-            <h3>Usually requires a refresh</h3>
+            <h1>Plugins (Beta)</h1>
+            <h3>May require a refresh upon enabling/disabling</h3>
             <div class="msgs"></div>
             <div class='plugins'>
     `;
@@ -1288,7 +1288,7 @@ async function loadplugins() {
             <h1>Custom Plugin</h1>
             <h3>Caution: can be very dangerous</h3>
             <div class='customplugin'>
-                <textarea class="editor" id='customplugininput' placeholder="// you put stuff here"></textarea>
+                <textarea class="editor" id='customplugininput' placeholder="// create plugin here"></textarea>
                 <input class='cstpgbt' type='button' value='Run' onclick="customplugin()">
             </div>
         </div>
@@ -1319,7 +1319,7 @@ async function fetchplugins() {
     try {
     // remember to bring this back when final
     //    const response = await fetch('./plugins.json');
-        const response = await fetch('https://meo-32r.pages.dev/plugins.json');
+        const response = await fetch('https://meo.atticat.tech/plugins.json');
         const pluginsdata = await response.json();
         return pluginsdata;
     } catch (error) {
