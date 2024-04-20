@@ -1,0 +1,91 @@
+/*Super DUPER top secret*/
+/*no sharing*/
+
+.light-theme {
+    --accent-color: #dddddd50;
+    --hov-accent-color: #dddddd80;
+    --hov-color: #dddddd50;
+    --background-color: transparent;
+    --button-color: #efefefb6;
+    --modal-color: #a793c450;
+    --modal-button-color: #dddddd80;
+    --hov-modal-button-color: #dddddd80;
+    --border-radius: 15px;
+    --button-radius: 15px;
+    --glass-border: 1px solid #ffffff80;
+}
+
+.dark-theme {
+    --accent-color: #3c3c3c50;
+    --hov-accent-color: #4f4f4f50;
+    --hov-color: #3c3c3c50;
+    --background-color: transparent;
+    --button-color: #ffffff73;
+    --modal-color: #4f4f4f50;
+    --modal-button-color: #4f4f4f50;
+    --hov-modal-button-color: #4f4f4f50;
+    --border-radius: 15px;
+    --button-radius: 15px;
+    --glass-border: 1px solid #ffffff20;
+}
+
+body {
+    background-image: url(https://512pixels.net/downloads/os9-5k/Quantum-Foam.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+    margin: 0;
+    background-attachment: fixed;
+
+}
+
+.post,
+.emojipicker,
+.modal {
+    backdrop-filter: blur(50px) saturate(1.5);
+    border: var(--glass-border);
+    border-radius: 15px;
+    box-shadow: 0px 10px 25px #00000050;
+}
+
+.post::before, .modal::before {
+    position: fixed;
+    width: 100%;
+    top: 0px;
+    height: 100%;
+    background-size: 100px 100px;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PScwIDAgNTEyIDUxMicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz4KICA8ZmlsdGVyIGlkPSdub2lzZUZpbHRlcic+CiAgICA8ZmVUdXJidWxlbmNlIAogICAgICB0eXBlPSdmcmFjdGFsTm9pc2UnIAogICAgICBiYXNlRnJlcXVlbmN5PScwLjcnCiAgICAgIG51bU9jdGF2ZXM9JzMnIAogICAgICBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+CiAgICA8ZmVDb2xvck1hdHJpeCBpbj0idHVyYnVsZW5jZSIgdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPgoKICAgIDxmZUNvbXBvbmVudFRyYW5zZmVyPgogICAgICA8ZmVGdW5jUiB0eXBlPSJkaXNjcmV0ZSIgdGFibGVWYWx1ZXM9IjAgMSIgLz4KICAgICAgPGZlRnVuY0cgdHlwZT0iZGlzY3JldGUiIHRhYmxlVmFsdWVzPSIwIDEiIC8+CiAgICAgIDxmZUZ1bmNCIHR5cGU9ImRpc2NyZXRlIiB0YWJsZVZhbHVlcz0iMCAxIiAvPgogICAgPC9mZUNvbXBvbmVudFRyYW5zZmVyPgogIDwvZmlsdGVyPgogIAogIDxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNub2lzZUZpbHRlciknLz4KPC9zdmc+");
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+    content: "";
+    z-index: -1;
+}
+
+.post:hover .buttonContainer {
+    background-color: transparent;
+}
+
+textarea,
+button,
+input,
+select {
+    backdrop-filter: blur(50px) saturate(1.5);
+    border: 1px solid #ffffff20;
+}
+
+::-webkit-input-placeholder {
+    /* WebKit, Blink, Edge */
+    color: #ffffff70;
+}
+
+:-moz-placeholder {
+    /* Mozilla Firefox 4 to 18 */
+    color: #ffffff70;
+}
+
+::-moz-placeholder {
+    /* Mozilla Firefox 19+ */
+    color: #ffffff70;
+}
