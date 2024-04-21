@@ -443,7 +443,7 @@ bridge {
 
 #main {
     flex: 1;
-    max-width: 700px;
+    max-width: 800px;
     overflow: none;
     height: auto;
     border: var(--border);
@@ -1368,7 +1368,7 @@ possible future styling
 
     #main {
         flex: none;
-        width: 100vw;
+        width: 200vw;
         scroll-snap-align: center;
         overflow: scroll;
         height: 100vh;

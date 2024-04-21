@@ -1271,7 +1271,7 @@ async function loadplugins() {
         settingsContent += `
             <div class='plugin'>
                 <h3>${plugin.name}</h3>
-                <i class='desc'>Created by <a href='https://github.com/${plugin.creator}'>${plugin.creator}</a></i>
+                <i class='desc'>Created by <a href='https://github.com/${plugin.creator}'>${plugin.creator}</a> | Installs from ${plugin.source}</i>
                 <p class='desc'>${plugin.description}</p>
                 <label>
                     enable
@@ -1317,7 +1317,7 @@ async function fetchplugins() {
     try {
     // remember to bring this back when final
     //    const response = await fetch('./plugins.json');
-        const response = await fetch('https://leo.atticat.tech/plugins.json');
+        const response = await fetch('plugins.json');
         const pluginsdata = await response.json();
         return pluginsdata;
     } catch (error) {

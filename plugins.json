@@ -3,18 +3,21 @@
     "name": "Meo/Leo Glass",
     "creator": "JoshAtticus",
     "description": "Glass theme for Meo/Leo",
+    "source": "Greasyfork",
     "script": "https://update.greasyfork.org/scripts/485845/MeoLeo%20Glass.user.js"
   },
   {
     "name": "Meower Turn",
     "creator": "JoshAtticus",
     "description": "Make Meower turn on keypress",
+    "source": "Greasyfork",
     "script": "https://update.greasyfork.org/scripts/486561/Meower%20Turn.user.js"
   },
   {
     "name": "Meower Rotate",
     "creator": "Bloctans",
     "description": "Rotate your meo!!!!",
+    "source": "Leo Plugins",
     "script": "plugins/rotate.js"
   }
 ]
