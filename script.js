@@ -115,6 +115,8 @@ function main() {
                         loadexplore();
                     } else if (pre === "start") {
                         loadstart();
+                    } else if (pre === "settings") {
+                        loadstgs();
                     } else {
                         loadchat(pre);
                     }                
@@ -568,9 +570,6 @@ function loadPfp(username, button) {
                         
                         pfpElement.style.border = `3px solid #fff`;
                         pfpElement.style.backgroundColor = `#fff`;
-                        
-                        console.error("No avatar or pfp_data available for: ", username);
-                        resolve(null);
                     }
 
                     if (pfpElement) {
@@ -834,7 +833,9 @@ function loadhome() {
     pre = "home";
     let pageContainer
     pageContainer = document.getElementById("main");
-    pageContainer.innerHTML = `<div class='info'><h1 class='header-top'>Home</h1><p id='info'></p></div>` + loadinputs();
+    pageContainer.innerHTML = `
+        <div class='info'><h1 class='header-top'>Home</h1><p id='info'></p>
+        </div>` + loadinputs();
     document.getElementById("info").innerText = lul + " users online (" + sul + ")";
     
     sidebars();
@@ -878,12 +879,26 @@ function sidebars() {
     `;
     
     let navlist = `
-    <input type='button' class='navigation-button button' id='profile' value='Profile' onclick='openUsrModal("${localStorage.getItem("uname")}")' aria-label="profile">
     <input type='button' class='navigation-button button' id='explore' value='Explore' onclick='loadexplore();' aria-label="explore">
     <input type='button' class='navigation-button button' id='inbox' value='Inbox' onclick='loadinbox()' aria-label="inbox">
     <input type='button' class='navigation-button button' id='settings' value='Settings' onclick='loadstgs()' aria-label="settings">
-    <input type='button' class='navigation-button button' id='logout' value='Logout' onclick='logout(false)' aria-label="logout">
+    <button type='button' class='user-area button' id='profile' onclick='openUsrModal("${localStorage.getItem("uname")}")' aria-label="profile">
+    <img class="avatar-small" id="uav" src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" style="border: 3px solid #b190fe;">
+    <span class="gcname">${localStorage.getItem("uname")}</span></div>
+    </button>
     `;
+
+    loadPfp(localStorage.getItem("uname"))
+    .then(pfpElem => {
+        if (pfpElem) {
+            const userAvatar = document.getElementById("uav");
+            userAvatar.src = pfpElem.src;
+            userAvatar.style.border = pfpElem.style.border.replace("3px", "3px");
+            if (pfpElem.classList.contains("svg-avatar")) {
+                userAvatar.classList.add("svg-avatar");
+            }
+        }
+    });
 
     if (localStorage.getItem("permissions") === "1") {
     navlist = `<input type='button' class='navigation-button button' id='moderation' value='Moderate' onclick='openModModal()' aria-label="moderate">` + navlist;
@@ -941,6 +956,7 @@ function sidebars() {
                             chatIconElem.classList.add("svg-avatar");
                         }
                     }
+                    console.log(pfpElem);
                 });
             }
             r.appendChild(chatIconElem);
@@ -1073,6 +1089,9 @@ function loadchat(chatid) {
         });
         return;
     }
+
+    sidebars();
+
     const data = chatCache[chatid];
 
     const mainContainer = document.getElementById("main");
@@ -1180,13 +1199,14 @@ function logout(iskl) {
 function loadstgs() {
     page = "settings";
     pre = "settings";
-    const navc = document.getElementById("nav");
+    const navc = document.querySelector(".nav-top");
     navc.innerHTML = `
     <div class='navigation'>
     <div class='nav-top'>
     <input type='button' class='navigation-button button' id='submit' value='General' onclick='loadgeneral()'>
     <input type='button' class='navigation-button button' id='submit' value='Appearance' onclick='loadappearance()'>
     <input type='button' class='navigation-button button' id='submit' value='Plugins (Beta)' onclick='loadplugins()'>
+    <input type='button' class='navigation-button button' id='logout' value='Logout' onclick='logout(false)' aria-label="logout">
     </div>
     <input type='button' class='navigation-button button' id='submit' value='Go Home' onclick='loadhome()'>
     </div>
@@ -1454,6 +1474,14 @@ function loadappearance() {
                     <button onclick='changetheme(\"bsky\", this)' class='theme-button bsky-theme'>Midnight</button>
                     <button onclick='changetheme(\"oled\", this)' class='theme-button oled-theme'>Black</button>
                     <button onclick='changetheme(\"roarer\", this)' class='theme-button roarer-theme'>Roarer</button>
+                    <button onclick='changetheme(\"flamingo\", this)' class='theme-button flamingo-theme'>Flamingo</button>
+                    <button onclick='changetheme(\"blurple\", this)' class='theme-button blurple-theme'>Blurple</button>
+                </div>
+            <h3>Glass Themes</h3>
+                <div class="theme-buttons-inner">
+                    <button onclick='changetheme(\"glight\", this)' class='theme-button glight-theme'>Light</button>
+                    <button onclick='changetheme(\"gdark\", this)' class='theme-button gdark-theme'>Dark</button>
+                    <button onclick='imagemodal()' class='theme-button upload-button'>Add Image</button>
                 </div>
             <h3>Custom Theme</h3>
                 <div class="theme-buttons-inner">
@@ -1581,6 +1609,11 @@ function loadappearance() {
     const themeButtons = document.querySelectorAll('.theme-button');
     themeButtons.forEach((btn) => btn.classList.remove('selected'));
     document.querySelector('.theme-buttons .' + localStorage.getItem('theme') + '-theme').classList.add('selected');
+    const lightThemeBody = document.querySelector('body');
+    if (lightThemeBody) {
+        lightThemeBody.style.backgroundImage = ``;
+    }
+    loadBG();
 }
 
 function applycsttme() {
@@ -2603,6 +2636,70 @@ function createChatModal() {
         }
     }
 }
+
+function imagemodal() {
+    document.documentElement.style.overflow = "hidden";
+
+    const mdlbck = document.querySelector('.modal-back');
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                <h3>Background Image Link</h3>
+                <input id="bg-image-input" class="mdl-inp" placeholder="https://512pixels.net/downloads/macos-wallpapers/10-3.png">
+                `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="updateBG()">update</button>
+                `;
+            }
+        }
+    }
+}
+
+function loadBG() {
+    const bgImageURL = localStorage.getItem('backgroundImageURL');
+    console.log(bgImageURL)
+    if (bgImageURL) {
+        const lightThemeBody = document.querySelector('.glight-theme body');
+        if (lightThemeBody) {
+            lightThemeBody.style.backgroundImage = `url('${bgImageURL}')`;
+        }
+
+        const darkThemeBody = document.querySelector('.gdark-theme body');
+        if (darkThemeBody) {
+            darkThemeBody.style.backgroundImage = `url('${bgImageURL}')`;
+        }
+    }
+}
+
+function updateBG() {
+    const bgImageInput = document.getElementById('bg-image-input');
+    if (bgImageInput) {
+        const bgImageURL = bgImageInput.value;
+
+        localStorage.setItem('backgroundImageURL', bgImageURL);
+
+        const lightThemeBody = document.querySelector('.glight-theme body');
+        if (lightThemeBody) {
+            lightThemeBody.style.backgroundImage = `url('${bgImageURL}')`;
+        }
+
+        const darkThemeBody = document.querySelector('.gdark-theme body');
+        if (darkThemeBody) {
+            darkThemeBody.style.backgroundImage = `url('${bgImageURL}')`;
+        }
+    }
+    closemodal();
+}
+
 // credit: theotherhades
 function ipBlockedModal() {
     console.log("Showing IP blocked modal");

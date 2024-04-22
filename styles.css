@@ -9,6 +9,10 @@ html {
 
 body {
     margin: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 input {
@@ -137,7 +141,7 @@ iframe {
 }
 
 ul, ol {
-    padding-left: 15px;
+    padding-left: 45px;
 }
 
 li::marker, code, kbd, samp, pre {
@@ -443,7 +447,7 @@ bridge {
 
 #main {
     flex: 1;
-    max-width: 800px;
+    max-width: 700px;
     overflow: none;
     height: auto;
     border: var(--border);
@@ -1282,6 +1286,15 @@ possible future styling
     border: 1px solid var(--accent-color);
     border-radius: var(--border-radius);
     user-select: none;
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--button-margin);
+    border-radius: var(--button-radius);
+    background-color: var(--accent-color);
+    padding: calc(var(--button-padding)/2) var(--button-padding);
 }
 
 @media screen and (max-width: 480px) {
