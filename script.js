@@ -1208,7 +1208,6 @@ function loadstgs() {
     <input type='button' class='navigation-button button' id='submit' value='Plugins (Beta)' onclick='loadplugins()'>
     <input type='button' class='navigation-button button' id='logout' value='Logout' onclick='logout(false)' aria-label="logout">
     </div>
-    <input type='button' class='navigation-button button' id='submit' value='Go Home' onclick='loadhome()'>
     </div>
     `;
 
