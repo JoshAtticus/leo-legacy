@@ -7,28 +7,41 @@
   "lang": "en",
   "scope": "/",
   "description": "Neo + Meower",
-  "categories": ["communication", "chat", "messaging"],
+  "categories": [
+    "entertainment",
+    "social",
+    "utilities"
+  ],
   "orientation": "any",
   "theme_color": "#1c1c26",
-  "icons": [{
-    "src": "images/icons/meo_ex_144.png",
-    "type": "image/png",
-    "sizes": "144x144",
-    "purpose": ""
-  }, {
-    "src": "images/icons/meo_ex_192.png",
-    "type": "image/png",
-    "sizes": "192x192",
-    "purpose": "any"
-  }, {
-    "src": "images/meo.svg",
-    "type": "image/svg+xml",
-    "sizes": "48x48 72x72 96x96 128x128 256x256",
-    "purpose": "monochrome"
-  }, {
-    "src": "images/icons/meo_ex_512.png",
-    "type": "image/png",
-    "sizes": "512x512",
-    "purpose": "maskable"
-  }]
+  "icons": [
+    {
+      "src": "images/icons/meo_ex_144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": ""
+    },
+    {
+      "src": "images/icons/meo_ex_192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "images/meo.svg",
+      "type": "image/svg+xml",
+      "sizes": "48x48 72x72 96x96 128x128 256x256",
+      "purpose": "monochrome"
+    },
+    {
+      "src": "images/icons/meo_ex_512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ]
 }
