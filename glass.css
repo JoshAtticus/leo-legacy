@@ -81,3 +81,50 @@
         color: #ffffff70;
     }
 }
+
+.contrast-theme .post,
+.contrast-theme .emojipicker,
+.contrast-theme .modal,
+.contrast-theme .report-box,
+.contrast-theme .report-user,
+.contrast-theme .report-post,
+.contrast-theme .mod-post,
+.contrast-theme .stg-section,
+.contrast-theme .reply,
+.contrast-theme .section,
+.contrast-theme input,
+.contrast-theme textarea,
+.contrast-theme select,
+.contrast-theme button {
+    border: 2px solid #0ff;
+}
+
+.contrast-theme .post {
+    box-sizing: border-box;
+}
+
+.contrast-theme input:focus,
+.contrast-theme textarea:focus,
+.contrast-theme select:focus,
+.contrast-theme button:focus {
+    border: 2px solid #0f0;
+}
+
+.contrast-theme .mdl-hr {
+    border: 1px solid #0ff;
+}
+
+.contrast-theme .toolButton:hover {
+    background-color: var(--hov-color);
+}
+
+.contrast-theme .buttonContainer {
+    background-color: transparent;
+}
+
+.contrast-theme :-moz-placeholder,
+.contrast-theme ::-webkit-input-placeholder,
+.contrast-theme ::-moz-placeholder {
+    color: #ffffff;
+    opacity: 1;
+}

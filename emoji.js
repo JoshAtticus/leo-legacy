@@ -444,7 +444,7 @@ function pickerhtm() {
             <button class="emojibutton" title="writing hand" onclick="addemoji('✍️')">✍️</button>
             <button class="emojibutton" title="open hands" onclick="addemoji('👐')">👐</button>
             <button class="emojibutton" title="raising hands" onclick="addemoji('🙌')">🙌</button>
-            <button class="emojibutton" title="folded hands" onclick="addemoji('🙏')">🙏</button>
+            <button class="emojibutton" title="folded hands, pray" onclick="addemoji('🙏')">🙏</button>
             <button class="emojibutton" title="handshake" onclick="addemoji('🤝')">🤝</button>
             <button class="emojibutton" title="nail polish" onclick="addemoji('💅')">💅</button>
             <button class="emojibutton" title="ear" onclick="addemoji('👂')">👂</button>
