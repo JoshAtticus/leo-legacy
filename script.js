@@ -1218,13 +1218,6 @@ function loadgeneral() {
             <h1>General</h1>
             <h3>Chat</h3>
             <div class="msgs"></div>
-            <div class='stg-section'>
-            <label>
-            Disable swear filter
-            <input type="checkbox" id="swearfilter" class="settingstoggle">
-            <p class="subsubheader">This should just be enabled by default</p>
-            </label>
-            </div>
             <div class="stg-section">
             <label>
             Auto-navigate to Home
