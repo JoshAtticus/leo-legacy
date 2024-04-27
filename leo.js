@@ -1,6 +1,10 @@
 var leo = {
     plugins: {
-        disable: function(pluginName) {
+        disable: function (pluginName) {
+            const restrictedNames = ['token', 'settings', 'uname', 'permissions', 'meoglass_bg'];
+            if (restrictedNames.includes(pluginName)) {
+                return 'Error: Modification of this item is not allowed.';
+            }
             if (localStorage.getItem(pluginName) === null) {
                 return 'Error: Plugin does not exist.';
             } else if (localStorage.getItem(pluginName) === 'false') {
@@ -10,7 +14,11 @@ var leo = {
                 location.reload();
             }
         },
-        enable: function(pluginName) {
+        enable: function (pluginName) {
+            const restrictedNames = ['token', 'settings', 'uname', 'permissions', 'meoglass_bg'];
+            if (restrictedNames.includes(pluginName)) {
+                return 'Error: Modification of this item is not allowed.';
+            }
             if (localStorage.getItem(pluginName) === null) {
                 return 'Error: Plugin does not exist.';
             } else {
@@ -18,15 +26,15 @@ var leo = {
                 location.reload();
             }
         },
-        list: function() {
+        list: function () {
             return fetchplugins();
         }
     },
     session: {
-        reload: function() {
+        reload: function () {
             location.reload();
         },
-        reset: function() {
+        reset: function () {
             localStorage.clear();
         }
     }
@@ -34,8 +42,8 @@ var leo = {
 
 async function fetchplugins() {
     try {
-    // remember to bring this back when final
-    //    const response = await fetch('./plugins.json');
+        // remember to bring this back when final
+        //    const response = await fetch('./plugins.json');
         const response = await fetch('plugins.json');
         const pluginsdata = await response.json();
         return pluginsdata;
