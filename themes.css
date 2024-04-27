@@ -1,6 +1,6 @@
 :root {
     --primary: #714cc8;
-    --secondary: #b595ff;
+    --secondary: #5d6092;
     --background: #1c1c26;
     --color: #fefefe;
     --accent-color: #2f3040;
@@ -33,44 +33,9 @@
     --color-scheme: dark;
 }
 
-.old-theme {
-    --primary: #714cc8;
-    --secondary: #b190fe;
-    --background: #1a1b1e;
-    --color: #fefefe;
-    --accent-color: #3a3d43;
-    --hov-accent-color: #323439;
-    --hov-color: #4a4d56;
-    --link-color: #00abd2;
-    --attachment-background-color: #3c286b;
-    --attachment-color: #b190fe;
-    --attachment-background-color-hover: #b190fe;
-    --attachment-color-hover: #fefefe;
-    --button-color: #a5abb3;
-    --hov-button-color: #fefefe;
-    --modal-color: #3a3d43;
-    --modal-button-color: #4a4d56;
-    --hov-modal-button-color: #636774;
-
-    --blue: #00abd2;
-    --green: #32E875;
-    --red: #cc2936;
-    --magenta: #F04290;
-    --transition: all 0.05s ease;
-    --border: none;
-    --border-radius: 5px;
-    --button-radius: 5px;
-    --margin: 10px;
-    --text-margin: 10px;
-    --padding: 10px;
-    --button-padding: 12px;
-    --button-margin: 10px;
-    --color-scheme: dark;
-}
-
 .dark-theme {
     --primary: #714cc8;
-    --secondary: #b595ff;
+    --secondary: #5d6092;
     --background: #1c1c26;
     --color: #fefefe;
     --accent-color: #2f3040;
@@ -95,21 +60,22 @@
 }
 
 .light-theme {
-    --background: #fefefe;
-    --color: #383a41;
-    --accent-color: #dbe0e8;
-    --hov-accent-color: #d2d6dd;
-    --hov-color: #e7eaee;
-    --link-color: #5023b6;
+    --primary: #714cc8;
+    --background: #f1f0fb;
+    --color: #43485b;
+    --accent-color: #dad9e9;
+    --hov-accent-color: #dfdeed;
+    --hov-color: #e6e3f0;
+    --link-color: #714cc8;
     --attachment-background-color: #d4c1ff;
     --attachment-color: #513593;
     --attachment-background-color-hover: #b190fe;
     --attachment-color-hover: #fefefe;
-    --button-color: #676d7a;
-    --hov-button-color: #383a41;
-    --modal-color: #fefefe;
-    --modal-button-color: #dbe0e8;
-    --hov-modal-button-color: #c9cdd4;
+    --button-color: #a49faf;
+    --hov-button-color: #7b7783;
+    --modal-color: #dad9e9;
+    --modal-button-color: #c6c5d6;
+    --hov-modal-button-color: #cdcbdb;
 
     --blue: #00abd2;
     --green: #32E875;
@@ -186,6 +152,109 @@
     --red: #cc2936;
     --magenta: #F04290;
     --color-scheme: dark;
+}
+
+.contrast-theme {
+    --primary: #00f;
+    
+    --background: #0c0c0c;
+    --color: #f0f0f0;
+    --accent-color: #0c0c0c;
+    --hov-accent-color: #0c0c0c;
+    --hov-color: #00f;
+    --link-color: #0ff;
+    --attachment-background-color: #00f;
+    --attachment-color: #fff;
+    --attachment-background-color-hover: #00f;
+    --attachment-color-hover: #fff;
+    --button-color: #f0f0f0;
+    --hov-button-color: #f0f0f0;
+    --modal-color: #0c0c0c;
+    --modal-button-color: #0c0c0c;
+    --hov-modal-button-color: #00f;
+
+    --blue: #0ff;
+    --green: #0f0;
+    --red: #f00;
+    --magenta: #f0f;
+    --color-scheme: dark;
+}
+
+.grain-theme {
+    --primary: #776d67;
+    
+    --background: #0b0b0b;
+    --color: #f0f0f0;
+    --accent-color: #111;
+    --hov-accent-color: #1c1c1c;
+    --hov-color: #252525;
+    --link-color: #00abd2;
+    --attachment-background-color: #413d3a;
+    --attachment-color: #afa7a1;
+    --attachment-background-color-hover: #776d67;
+    --attachment-color-hover: #fff;
+    --button-color: #afa7a1;
+    --hov-button-color: #f0f0f0;
+    --modal-color: #111;
+    --modal-button-color: #1c1c1c;
+    --hov-modal-button-color: #252525;
+
+    --blue: #00abd2;
+    --green: #32E875;
+    --red: #cc2936;
+    --magenta: #F04290;
+    --color-scheme: dark;
+}
+
+.grip-theme {
+    --primary: #f46f16;
+    
+    --background: #111114;
+    --color: #f0f0f0;   
+    --accent-color: #1f1e24;
+    --hov-accent-color: #32313a;
+    --hov-color: #4a4854;
+    --link-color: #00abd2;
+    --attachment-background-color: #5b409b90;
+    --attachment-color: #bea2ff;
+    --attachment-background-color-hover: #714cc8;
+    --attachment-color-hover: #fefefe;
+    --button-color: #a6a2ba;
+    --hov-button-color: #f0f0f0;
+    --modal-color: #1f1e24;
+    --modal-button-color: #32313a;
+    --hov-modal-button-color: #4a4854;
+
+    --blue: #00abd2;
+    --green: #32E875;
+    --red: #cc2936;
+    --magenta: #F04290;
+    --color-scheme: dark;
+}
+
+.scratch-theme {
+    --primary: #714cc8;
+    --background: #f1f0fb;
+    --color: #43485b;
+    --accent-color: #dad9e9;
+    --hov-accent-color: #dfdeed;
+    --hov-color: #e6e3f0;
+    --link-color: #714cc8;
+    --attachment-background-color: #d4c1ff;
+    --attachment-color: #513593;
+    --attachment-background-color-hover: #b190fe;
+    --attachment-color-hover: #fefefe;
+    --button-color: #a49faf;
+    --hov-button-color: #7b7783;
+    --modal-color: #dad9e9;
+    --modal-button-color: #c6c5d6;
+    --hov-modal-button-color: #cdcbdb;
+
+    --blue: #00abd2;
+    --green: #32E875;
+    --red: #cc2936;
+    --magenta: #F04290;
+    --color-scheme: light;
 }
 
 .cosmic-theme {
@@ -328,6 +397,65 @@
     --border-radius: 5px;
     --button-radius: 5px;
     --glass-border: 1px solid #ffffff20;
+}
+
+.oldlight-theme {
+    --background: #fefefe;
+    --color: #383a41;
+    --accent-color: #dbe0e8;
+    --hov-accent-color: #d2d6dd;
+    --hov-color: #e7eaee;
+    --link-color: #5023b6;
+    --attachment-background-color: #d4c1ff;
+    --attachment-color: #513593;
+    --attachment-background-color-hover: #b190fe;
+    --attachment-color-hover: #fefefe;
+    --button-color: #676d7a;
+    --hov-button-color: #383a41;
+    --modal-color: #fefefe;
+    --modal-button-color: #dbe0e8;
+    --hov-modal-button-color: #c9cdd4;
+
+    --blue: #00abd2;
+    --green: #32E875;
+    --red: #cc2936;
+    --magenta: #F04290;
+    --color-scheme: light;
+}
+
+.old-theme {
+    --primary: #714cc8;
+    --secondary: #b190fe;
+    --background: #1a1b1e;
+    --color: #fefefe;
+    --accent-color: #3a3d43;
+    --hov-accent-color: #323439;
+    --hov-color: #4a4d56;
+    --link-color: #00abd2;
+    --attachment-background-color: #3c286b;
+    --attachment-color: #b190fe;
+    --attachment-background-color-hover: #b190fe;
+    --attachment-color-hover: #fefefe;
+    --button-color: #a5abb3;
+    --hov-button-color: #fefefe;
+    --modal-color: #3a3d43;
+    --modal-button-color: #4a4d56;
+    --hov-modal-button-color: #636774;
+
+    --blue: #00abd2;
+    --green: #32E875;
+    --red: #cc2936;
+    --magenta: #F04290;
+    --transition: all 0.05s ease;
+    --border: none;
+    --border-radius: 5px;
+    --button-radius: 5px;
+    --margin: 10px;
+    --text-margin: 10px;
+    --padding: 10px;
+    --button-padding: 12px;
+    --button-margin: 10px;
+    --color-scheme: dark;
 }
 
 .theme-buttons-inner {

@@ -24,7 +24,7 @@ function erimd(content) {
 function loadinputs() {
     const inputs = `
     <div class='message-container'>
-        <button class='message-tool button' id='attach' value='Attachments' aria-label="Attachments">
+        <button class='message-tool button' id='attach' value='Attachments' onclick='uploadImage()' aria-label="Attachments">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37256 18.6274 0 12 0C5.37256 0 0 5.37256 0 12C0 18.6274 5.37256 24 12 24ZM18.7896 13.1978L13.2046 13.1982L13.2051 18.7832C13.2056 19.4453 12.6694 19.9814 12.0068 19.9814C11.3447 19.9814 10.8076 19.4443 10.8086 18.7832V13.1982L5.20996 13.1987C4.54785 13.1987 4.01123 12.6621 4.01123 12C4.01074 11.3384 4.54736 10.8018 5.20947 10.8018H10.8081L10.8086 5.2168C10.8081 4.79785 11.0229 4.4292 11.3486 4.21484C11.5376 4.09033 11.7637 4.01807 12.0068 4.01807C12.6685 4.01758 13.2056 4.55469 13.2051 5.21631L13.2046 10.8013H18.7896C19.4517 10.8008 19.9878 11.3369 19.9878 11.9995C19.9883 12.6616 19.4517 13.1982 18.7896 13.1978Z" fill="currentColor"/>
             </svg>
@@ -62,9 +62,9 @@ function buttonbadges(content) {
         if ((['png', 'jpg', 'jpeg', 'webp', 'gif', 'mp4', 'webm', 'mov', 'm4v'].includes(fileExtension)) || fileDomain) {
             link.classList.add('attachment');
             link.innerHTML = '<svg class="icon_ecf39b icon__13ad2" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M10.57 4.01a6.97 6.97 0 0 1 9.86 0l.54.55a6.99 6.99 0 0 1 0 9.88l-7.26 7.27a1 1 0 0 1-1.42-1.42l7.27-7.26a4.99 4.99 0 0 0 0-7.06L19 5.43a4.97 4.97 0 0 0-7.02 0l-8.02 8.02a3.24 3.24 0 1 0 4.58 4.58l6.24-6.24a1.12 1.12 0 0 0-1.58-1.58l-3.5 3.5a1 1 0 0 1-1.42-1.42l3.5-3.5a3.12 3.12 0 1 1 4.42 4.42l-6.24 6.24a5.24 5.24 0 0 1-7.42-7.42l8.02-8.02Z" class=""></path></svg><span> attachments</span>';
-        } else if (url === "https://leo.atticat.tech/" || url === "https://leo.atticat.tech") {
+        } else if (url === "https://meo-32r.pages.dev/" || url === "https://meo-32r.pages.dev") {
             link.classList.add('attachment');
-            link.innerHTML = '<span class="ext-link-wrapper"><span class="link-icon-wrapper"><img width="14px" class="ext-icon" src="images/links/meo_1x.png"></span>leo</span>';
+            link.innerHTML = '<span class="ext-link-wrapper"><span class="link-icon-wrapper"><img width="14px" class="ext-icon" src="images/links/meo_1x.png"></span>meo</span>';
         } else {
             // find a better method to do this
             const socregex = {
@@ -77,7 +77,7 @@ function buttonbadges(content) {
                 'facebook': /facebook\.com\/(\w+)/,
                 'scratch': /scratch\.mit.edu\/users\/(\w+)/,
                 'meower_user': /app.meower\.org\/users\/(\w+)/,
-                'meower_share': /leo\.atticat\.tech\/share\?id=([\w-]+)/
+                'meower_share': /meo-32r\.pages\.dev\/share\?id=([\w-]+)/
             };
             
             const socialmedicns = {
