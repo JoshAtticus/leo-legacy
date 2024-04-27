@@ -19,5 +19,19 @@
     "description": "Rotate your meo!!!!",
     "source": "Leo Plugins",
     "script": "plugins/rotate.js"
+  },
+  {
+    "name": "No Emoji",
+    "creator": "JoshAtticus",
+    "description": "Remove emoji picker from Meo/Leo",
+    "source": "Leo Plugins",
+    "script": "plugins/nomoji.js"
+  },
+  {
+    "name": "No Placeholders",
+    "creator": "JoshAtticus",
+    "description": "Remove placeholders from Meo/Leo",
+    "source": "Leo Plugins",
+    "script": "plugins/noplaceholders.js"
   }
 ]
