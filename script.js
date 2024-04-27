@@ -373,7 +373,6 @@ function loadpost(p) {
     }
     
     const postContainer = document.createElement("div");
-    postContainer.id = p._id;
     postContainer.classList.add("post");
     postContainer.setAttribute("tabindex", "0");
 
@@ -430,9 +429,10 @@ function loadpost(p) {
         } else {
             pageContainer.appendChild(postContainer);
         }
-    
+        
         loadreply(p.post_origin, replyid).then(replycontainer => {
-            wrapperDiv.insertBefore(replycontainer, wrapperDiv.querySelector(".post-content"));
+            pstinf.after(replycontainer);
+            //wrapperDiv.appendChild(replycontainer);
         });
     
         content = content.replace(match[0], '').trim();
@@ -468,6 +468,8 @@ function loadpost(p) {
         });
     }
 
+    postContainer.appendChild(wrapperDiv);
+
     loadPfp(user, 0)
         .then(pfpElement => {
             if (pfpElement) {
@@ -477,14 +479,12 @@ function loadpost(p) {
                 postContainer.insertBefore(pfpDiv, wrapperDiv);
             }
         });
-        
-    postContainer.appendChild(wrapperDiv);
 
     const pageContainer = document.getElementById("msgs");
-    const existingPost = document.getElementById(postContainer.id);
+    const existingPost = document.getElementById(p._id);
+    postContainer.id = p._id;
     if (existingPost) {
-        pageContainer.insertBefore(postContainer, existingPost);
-        existingPost.remove();
+        existingPost.replaceWith(postContainer);
     } else if (pageContainer.firstChild) {
         pageContainer.insertBefore(postContainer, pageContainer.firstChild);
     } else {
@@ -839,6 +839,9 @@ function loadhome() {
     
     if (postCache["home"]) {
         postCache["home"].forEach(post => {
+            if (page !== "home") {
+                return;
+            }
             loadpost(post);
         });
     } else {
@@ -851,6 +854,9 @@ function loadhome() {
             postsarray.reverse();
             postCache["home"] = postsarray;
             postsarray.forEach(post => {
+                if (page !== "home") {
+                    return;
+                }
                 loadpost(post);
             });
         };
@@ -880,8 +886,8 @@ function sidebars() {
     <input type='button' class='navigation-button button' id='inbox' value='Inbox' onclick='loadinbox()' aria-label="inbox">
     <input type='button' class='navigation-button button' id='settings' value='Settings' onclick='loadstgs()' aria-label="settings">
     <button type='button' class='user-area button' id='profile' onclick='openUsrModal("${localStorage.getItem("uname")}")' aria-label="profile">
-    <img class="avatar-small" id="uav" src="https://uploads.meower.org/icons/o1KPbrqDXKV6BeqmbwLvZurG" style="border: 3px solid #ad3e00;">
-    <span class="gcname">${localStorage.getItem("uname")}</span></div>
+        <img class="avatar-small" id="uav" src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" style="border: 3px solid #b190fe;">
+        <span class="gcname">${localStorage.getItem("uname")}</span></div>
     </button>
     `;
 
@@ -914,14 +920,18 @@ function sidebars() {
         const groupsdiv = document.getElementById("groups");
         const gcdiv = document.createElement("div");
         gcdiv.className = "gcs";
+        gcdiv.setAttribute("tabindex", "-1");
+
 
         groupsdiv.innerHTML = `
         <h1 class="groupheader">Chats</h1>
-        <input type="text" class="search-input" id="search" placeholder="Search" rows="1" autocomplete="false">
+        <button class="search-input button" id="search" aria-label="search" onclick="goAnywhere();"><span class="srchtx">Search</span></button
+        
         `;
         gcdiv.innerHTML += `<button class="navigation-button button gcbtn" onclick="loadhome()">
         <svg width="36" height="26" class="homebuttonsvg" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.8334 21.6667V15.1667H15.1667V21.6667H20.5834V13H23.8334L13.0001 3.25L2.16675 13H5.41674V21.6667H10.8334Z" fill="currentColor"/></svg>
-        <span class="gcname">Home</span></button>`;
+        <span class="gcname">Home</span></button>
+        `;
 
         response.autoget.forEach(chat => {
             chatCache[chat._id] = chat;
@@ -956,6 +966,8 @@ function sidebars() {
                     console.log(pfpElem);
                 });
             }
+            console.log(chatIconElem)
+
             r.appendChild(chatIconElem);
 
             const chatNameElem = document.createElement("span");
@@ -965,8 +977,9 @@ function sidebars() {
     
             gcdiv.appendChild(r);
         });
-    
+
         groupsdiv.appendChild(gcdiv);
+
     };
     char.send();
 
@@ -1012,7 +1025,7 @@ function loadstart() {
                 }
                 if (item.avatar) {
                     profilecont.innerHTML = `
-                        <img class="avatar-small" style="border: 3px solid #${item.avatar_color}; background-color:#${item.avatar_color};" src="https://uploads.meower.org/icons/${item.avatar}.png" alt="${item._id}" title="${item._id}"></img>
+                        <img class="avatar-small" style="border: 3px solid #${item.avatar_color}; background-color:#${item.avatar_color};" src="https://uploads.meower.org/icons/${item.avatar}" alt="${item._id}" title="${item._id}"></img>
                     `;
                 } else if (item.pfp_data) {
                     profilecont.innerHTML = `
@@ -1054,12 +1067,12 @@ function opendm(username) {
     });
 }
 
-function loadchat(chatid) {
-    page = chatid;
-    pre = chatid;
+function loadchat(chatId) {
+    page = chatId;
+    pre = chatId;
 
-    if (!chatCache[chatid]) {
-        fetch(`https://api.meower.org/chats/${chatid}`, {
+    if (!chatCache[chatId]) {
+        fetch(`https://api.meower.org/chats/${chatId}`, {
             headers: {token: localStorage.getItem("token")}
         })
         .then(response => {
@@ -1073,8 +1086,8 @@ function loadchat(chatid) {
             return response.json();
         })
         .then(data => {
-            chatCache[chatid] = data;
-            loadchat(chatid);
+            chatCache[chatId] = data;
+            loadchat(chatId);
         })
         .catch(e => {
             openUpdate(`Unable to open chat: ${e}`);
@@ -1089,11 +1102,11 @@ function loadchat(chatid) {
 
     sidebars();
 
-    const data = chatCache[chatid];
+    const data = chatCache[chatId];
 
     const mainContainer = document.getElementById("main");
     if (data.nickname) {
-        mainContainer.innerHTML = `<div class='info'><h1 id='nickname'>${escapeHTML(data.nickname)}<i class="subtitle">${chatid}</i></h1><p id='info'></p></div>` + loadinputs();
+        mainContainer.innerHTML = `<div class='info'><h1 id='nickname'>${escapeHTML(data.nickname)}<i class="subtitle">${chatId}</i></h1><p id='info'></p></div>` + loadinputs();
         const ulinf = document.getElementById('info');
         data.members.forEach((user, index) => {
             if (index === data.members.length - 1) {
@@ -1108,24 +1121,30 @@ function loadchat(chatid) {
         </svg>            
         `;
     } else {
-        mainContainer.innerHTML = `<div class='info'><h1 id='nickname'>${data.members.find(v => v !== localStorage.getItem("uname"))}<i class="subtitle">${chatid}</i></h1><p id='info'></p></div>` + loadinputs();
+        mainContainer.innerHTML = `<div class='info'><h1 id='nickname'>${data.members.find(v => v !== localStorage.getItem("uname"))}<i class="subtitle">${chatId}</i></h1><p id='info'></p></div>` + loadinputs();
     }
 
-    if (postCache[chatid]) {
-        postCache[chatid].forEach(post => {
+    if (postCache[chatId]) {
+        postCache[chatId].forEach(post => {
+            if (page !== chatId) {
+                return;
+            }
             loadpost(post);
         });
     } else {
         const xhttpPosts = new XMLHttpRequest();
-        xhttpPosts.open("GET", `https://api.meower.org/posts/${chatid}?autoget`);
+        xhttpPosts.open("GET", `https://api.meower.org/posts/${chatId}?autoget`);
         xhttpPosts.setRequestHeader("token", localStorage.getItem('token'));
         xhttpPosts.onload = () => {
             const postsData = JSON.parse(xhttpPosts.response);
             const postsarray = postsData.autoget || [];
 
             postsarray.reverse();
-            postCache[chatid] = postsarray;
+            postCache[chatId] = postsarray;
             postsarray.forEach(post => {
+                if (page !== chatId) {
+                    return;
+                }
                 loadpost(post);
             });
         };
@@ -1198,16 +1217,11 @@ function loadstgs() {
     pre = "settings";
     const navc = document.querySelector(".nav-top");
     navc.innerHTML = `
-    <div class='navigation'>
-    <div class='nav-top'>
-    <input type='button' class='navigation-button button' id='submit' value='General' onclick='loadgeneral()'>
-    <input type='button' class='navigation-button button' id='submit' value='Appearance' onclick='loadappearance()'>
-    <input type='button' class='navigation-button button' id='submit' value='Plugins (Beta)' onclick='loadplugins()'>
+    <input type='button' class='navigation-button button' id='submit' value='General' onclick='loadgeneral()' aria-label="general">
+    <input type='button' class='navigation-button button' id='submit' value='Appearance' onclick='loadappearance()' aria-label="appearance">
+    <input type="button" class="navigation-button button" id="submit" value="Plugins (Beta)" onclick="loadplugins()" aria-label="plugins">
     <input type='button' class='navigation-button button' id='logout' value='Logout' onclick='logout(false)' aria-label="logout">
-    </div>
-    </div>
     `;
-
     loadgeneral();
 }
 
@@ -1365,7 +1379,7 @@ function loadappearance() {
     <div class="settings">
         <h1>Appearance</h1>
         <div class="msgs example-msg">
-        <div id="example" class="post" style="margin-top: -2.8em;"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
+        <div id="example" class="post" style="margin-top: -2.8em;"><div class="pfp"><img src="https://uploads.meower.org/icons/o1KPbrqDXKV6BeqmbwLvZurG" alt="Avatar" class="avatar" style="border: 3px solid #ad3e00;"></div><div class="wrapper"><div class="buttonContainer">
                     <div class="toolbarContainer">
                         <div class="toolButton">
                             <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M12.9297 3.25007C12.7343 3.05261 12.4154 3.05226 12.2196 3.24928L11.5746 3.89824C11.3811 4.09297 11.3808 4.40733 11.5739 4.60245L16.5685 9.64824C16.7614 9.84309 16.7614 10.1569 16.5685 10.3517L11.5739 15.3975C11.3808 15.5927 11.3811 15.907 11.5746 16.1017L12.2196 16.7507C12.4154 16.9477 12.7343 16.9474 12.9297 16.7499L19.2604 10.3517C19.4532 10.1568 19.4532 9.84314 19.2604 9.64832L12.9297 3.25007Z"></path><path d="M8.42616 4.60245C8.6193 4.40733 8.61898 4.09297 8.42545 3.89824L7.78047 3.24928C7.58466 3.05226 7.26578 3.05261 7.07041 3.25007L0.739669 9.64832C0.5469 9.84314 0.546901 10.1568 0.739669 10.3517L7.07041 16.7499C7.26578 16.9474 7.58465 16.9477 7.78047 16.7507L8.42545 16.1017C8.61898 15.907 8.6193 15.5927 8.42616 15.3975L3.43155 10.3517C3.23869 10.1569 3.23869 9.84309 3.43155 9.64824L8.42616 4.60245Z"></path></svg>
@@ -1386,7 +1400,7 @@ function loadappearance() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clip-rule="evenodd" class=""></path></svg>
                         </div>
                     </div>
-                    </div><h3><span id="username">Eris</span><bridge title="This post has been bridged from another platform.">Bridged</bridge><i class="date">06/03/2024, 3:36:53 pm</i></h3><p>Hi</p></div></div><div id="example" class="post"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
+                    </div><h3><span id="username">melt</span><bridge title="This post has been bridged from another platform.">Bridged</bridge><i class="date">04/06/24, 11:49 pm</i></h3><p>pal was so eepy she couldn't even finish speaking!! 😹</p></div></div><div id="example" class="post"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
                     <div class="toolbarContainer">
                         <div class="toolButton">
                             <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M12.9297 3.25007C12.7343 3.05261 12.4154 3.05226 12.2196 3.24928L11.5746 3.89824C11.3811 4.09297 11.3808 4.40733 11.5739 4.60245L16.5685 9.64824C16.7614 9.84309 16.7614 10.1569 16.5685 10.3517L11.5739 15.3975C11.3808 15.5927 11.3811 15.907 11.5746 16.1017L12.2196 16.7507C12.4154 16.9477 12.7343 16.9474 12.9297 16.7499L19.2604 10.3517C19.4532 10.1568 19.4532 9.84314 19.2604 9.64832L12.9297 3.25007Z"></path><path d="M8.42616 4.60245C8.6193 4.40733 8.61898 4.09297 8.42545 3.89824L7.78047 3.24928C7.58466 3.05226 7.26578 3.05261 7.07041 3.25007L0.739669 9.64832C0.5469 9.84314 0.546901 10.1568 0.739669 10.3517L7.07041 16.7499C7.26578 16.9474 7.58465 16.9477 7.78047 16.7507L8.42545 16.1017C8.61898 15.907 8.6193 15.5927 8.42616 15.3975L3.43155 10.3517C3.23869 10.1569 3.23869 9.84309 3.43155 9.64824L8.42616 4.60245Z"></path></svg>
@@ -1407,7 +1421,7 @@ function loadappearance() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clip-rule="evenodd" class=""></path></svg>
                         </div>
                     </div>
-                    </div><h3><span id="username">Eris</span><bridge title="This post has been bridged from another platform.">Bridged</bridge><i class="date">06/03/2024, 3:36:53 pm</i></h3><p>Hi</p></div></div><div id="example" class="post"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
+                    </div><h3><span id="username">Eris</span><i class="date">04/06/24, 11:12 pm</i></h3><p>get ready for this</p></div></div><div id="example" class="post"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
                     <div class="toolbarContainer">
                         <div class="toolButton">
                             <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M12.9297 3.25007C12.7343 3.05261 12.4154 3.05226 12.2196 3.24928L11.5746 3.89824C11.3811 4.09297 11.3808 4.40733 11.5739 4.60245L16.5685 9.64824C16.7614 9.84309 16.7614 10.1569 16.5685 10.3517L11.5739 15.3975C11.3808 15.5927 11.3811 15.907 11.5746 16.1017L12.2196 16.7507C12.4154 16.9477 12.7343 16.9474 12.9297 16.7499L19.2604 10.3517C19.4532 10.1568 19.4532 9.84314 19.2604 9.64832L12.9297 3.25007Z"></path><path d="M8.42616 4.60245C8.6193 4.40733 8.61898 4.09297 8.42545 3.89824L7.78047 3.24928C7.58466 3.05226 7.26578 3.05261 7.07041 3.25007L0.739669 9.64832C0.5469 9.84314 0.546901 10.1568 0.739669 10.3517L7.07041 16.7499C7.26578 16.9474 7.58465 16.9477 7.78047 16.7507L8.42545 16.1017C8.61898 15.907 8.6193 15.5927 8.42616 15.3975L3.43155 10.3517C3.23869 10.1569 3.23869 9.84309 3.43155 9.64824L8.42616 4.60245Z"></path></svg>
@@ -1428,7 +1442,7 @@ function loadappearance() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clip-rule="evenodd" class=""></path></svg>
                         </div>
                     </div>
-                    </div><h3><span id="username">Eris</span><bridge title="This post has been bridged from another platform.">Bridged</bridge><i class="date">06/03/2024, 3:36:53 pm</i></h3><p>Hi</p></div></div><div id="example" class="post"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
+                    </div><h3><span id="username">Eris</span><i class="date">04/06/24, 11:12 pm</i></h3><p>so ur scared of helpful advice</p></div></div><div id="example" class="post"><div class="pfp"><img src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" alt="Avatar" class="avatar" style="border: 3px solid #b190fe;"></div><div class="wrapper"><div class="buttonContainer">
                     <div class="toolbarContainer">
                         <div class="toolButton">
                             <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M12.9297 3.25007C12.7343 3.05261 12.4154 3.05226 12.2196 3.24928L11.5746 3.89824C11.3811 4.09297 11.3808 4.40733 11.5739 4.60245L16.5685 9.64824C16.7614 9.84309 16.7614 10.1569 16.5685 10.3517L11.5739 15.3975C11.3808 15.5927 11.3811 15.907 11.5746 16.1017L12.2196 16.7507C12.4154 16.9477 12.7343 16.9474 12.9297 16.7499L19.2604 10.3517C19.4532 10.1568 19.4532 9.84314 19.2604 9.64832L12.9297 3.25007Z"></path><path d="M8.42616 4.60245C8.6193 4.40733 8.61898 4.09297 8.42545 3.89824L7.78047 3.24928C7.58466 3.05226 7.26578 3.05261 7.07041 3.25007L0.739669 9.64832C0.5469 9.84314 0.546901 10.1568 0.739669 10.3517L7.07041 16.7499C7.26578 16.9474 7.58465 16.9477 7.78047 16.7507L8.42545 16.1017C8.61898 15.907 8.6193 15.5927 8.42616 15.3975L3.43155 10.3517C3.23869 10.1569 3.23869 9.84309 3.43155 9.64824L8.42616 4.60245Z"></path></svg>
@@ -1449,7 +1463,7 @@ function loadappearance() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clip-rule="evenodd" class=""></path></svg>
                         </div>
                     </div>
-                    </div><h3><span id="username">Eris</span><bridge title="This post has been bridged from another platform.">Bridged</bridge><i class="date">06/03/2024, 3:36:53 pm</i></h3><p>Hi</p></div></div>
+                    </div><h3><span id="username">Eris</span><i class="date">04/04/24, 10:49 pm</i></h3><p><a href="https://uploads.meower.org/attachments/oMZqXLbqOjb9fbkRN3VDYmI0/togif.gif" target="_blank" class="attachment"><svg class="icon_ecf39b icon__13ad2" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M10.57 4.01a6.97 6.97 0 0 1 9.86 0l.54.55a6.99 6.99 0 0 1 0 9.88l-7.26 7.27a1 1 0 0 1-1.42-1.42l7.27-7.26a4.99 4.99 0 0 0 0-7.06L19 5.43a4.97 4.97 0 0 0-7.02 0l-8.02 8.02a3.24 3.24 0 1 0 4.58 4.58l6.24-6.24a1.12 1.12 0 0 0-1.58-1.58l-3.5 3.5a1 1 0 0 1-1.42-1.42l3.5-3.5a3.12 3.12 0 1 1 4.42 4.42l-6.24 6.24a5.24 5.24 0 0 1-7.42-7.42l8.02-8.02Z" class=""></path></svg><span> attachments</span></a></p><img src="https://uploads.meower.org/attachments/oMZqXLbqOjb9fbkRN3VDYmI0/togif.gif" onclick="openImage('https://uploads.meower.org/attachments/oMZqXLbqOjb9fbkRN3VDYmI0/togif.gif')" alt="togif.gif" class="embed"></div></div>
             </div>
         <div class="theme-buttons">
             <h3>Theme</h3>
@@ -1465,6 +1479,17 @@ function loadappearance() {
                     <button onclick='changetheme(\"roarer\", this)' class='theme-button roarer-theme'>Roarer</button>
                     <button onclick='changetheme(\"flamingo\", this)' class='theme-button flamingo-theme'>Flamingo</button>
                     <button onclick='changetheme(\"blurple\", this)' class='theme-button blurple-theme'>Blurple</button>
+                    <button onclick='changetheme(\"grain\", this)' class='theme-button grain-theme'>Grain</button>
+                    <button onclick='changetheme(\"grip\", this)' class='theme-button grip-theme'>9rip</button>
+                </div>
+            <h3>Accessible Themes</h3>
+                <div class="theme-buttons-inner">
+                    <button onclick='changetheme(\"contrast\", this)' class='theme-button contrast-theme'>High Contrast</button>
+                </div>
+            <h3>Original Themes</h3>
+                <div class="theme-buttons-inner">
+                    <button onclick='changetheme(\"oldlight\", this)' class='theme-button oldlight-theme'>Old Light</button>
+                    <button onclick='changetheme(\"old\", this)' class='theme-button old-theme'>Old Dark</button>
                 </div>
             <h3>Glass Themes</h3>
                 <div class="theme-buttons-inner">
@@ -1547,10 +1572,8 @@ function loadappearance() {
                 <label for="primary">Modal Button Hover Color:</label>
                 <input type="color" id="hov-modal-button-color" name="hov-modal-button-color" value="#4d576a">
                 </div>
-        
-        
-                <button onclick="applycsttme()" class="cstpgbt">Apply</button>
-        </div>
+            </div>
+            <button onclick="applycsttme()" class="cstpgbt button">Apply</button>
         <h3>Custom CSS</h3>
         <div class='customcss'>
             <textarea class="editor" id='customcss' placeholder="// you put stuff here"></textarea>
@@ -1598,11 +1621,6 @@ function loadappearance() {
     const themeButtons = document.querySelectorAll('.theme-button');
     themeButtons.forEach((btn) => btn.classList.remove('selected'));
     document.querySelector('.theme-buttons .' + localStorage.getItem('theme') + '-theme').classList.add('selected');
-    const lightThemeBody = document.querySelector('body');
-    if (lightThemeBody) {
-        lightThemeBody.style.backgroundImage = ``;
-    }
-    loadBG();
 }
 
 function applycsttme() {
@@ -1660,6 +1678,11 @@ function changetheme(theme, button) {
     const themeButtons = document.querySelectorAll('.theme-button');
     themeButtons.forEach((btn) => btn.classList.remove('selected'));
     button.classList.add('selected');
+    const lightThemeBody = document.querySelector('body');
+    if (lightThemeBody) {
+        lightThemeBody.style.backgroundImage = ``;
+    }
+    loadBG();
 }
 
 function settingsstuff() {
@@ -2045,7 +2068,7 @@ function openModModal() {
                 <span class="subheader">Moderate User (Case Sensitive)</span>
                 <div class="mod-goto">
                 <form class="section-form" onsubmit="modgotousr();">
-                <input type="text" class="mdl-inp" id="usrinpmd" placeholder="Username...">
+                <input type="text" class="mdl-inp" id="usrinpmd" placeholder="Tnix">
                 <button class="md-inp-btn button">Go!</button>
                 </form>
                 </div>
@@ -2628,11 +2651,11 @@ function createChatModal() {
 
 function imagemodal() {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
     if (mdlbck) {
         mdlbck.style.display = 'flex';
-
+        
         const mdl = mdlbck.querySelector('.modal');
         mdl.id = 'mdl-uptd';
         if (mdl) {
@@ -2765,7 +2788,7 @@ function mdlpingusr(event) {
 
 function mdlshare(event) {
     const postId = event.target.closest('.modal').id;
-    window.open(`https://leo.atticat.tech/share?id=${postId}`, '_blank');
+    window.open(`https://meo-32r.pages.dev/share?id=${postId}`, '_blank');
     closemodal();
 }
 
@@ -2872,6 +2895,137 @@ function createDate(tsmp) {
     const ts = new Date();
     ts.setTime(tsrb);
     return new Date(tsrb).toLocaleString([], { month: '2-digit', day: '2-digit', year: '2-digit', hour: 'numeric', minute: 'numeric' });
+}
+
+function uploadImage() {
+    openUpdate("Placeholder!");
+}
+
+function goAnywhere() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-qkshr';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                    <form class="section-form" onsubmit="goTo();">
+                        <input type="text" id="goanywhere" class="big-mdl-inp" placeholder="Where would you like to go?" autocomplete="off">
+                    </form>
+                    <div class="search-population">
+                        <div class="searchitem">Search for anything!</div>
+                        <div class="searchitem">Use <span id="scil" title="Profile"> !</span><span id="scil" title="DM"> @</span><span id="scil" title="Chat"> #</span> for something specific.</div>            
+                    </div>
+                `;
+                const goanywhereInput = mdlt.querySelector('#goanywhere');
+                goanywhereInput.addEventListener('input', populateSearch);
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="goTo()">go!</button>
+                `;
+            }
+        }
+    }
+    if (window.innerWidth >= 480) {
+        document.getElementById("goanywhere").focus();
+    }
+}
+
+function goTo() {
+    event.preventDefault();
+    const place = document.getElementById("goanywhere").value;
+    closemodal();
+    if (place.charAt(0) === "#") {
+        const nickname = place.substring(1);
+        const chatId = searchChats(nickname);
+        if (chatId) {
+            loadchat(chatId);
+        }
+    } else if (place.charAt(0) === "@") {
+        opendm(place.substring(1));
+    } else if (place.charAt(0) === "!") {
+        openUsrModal(place.substring(1));
+    } else if (place === "home") {
+        loadhome();
+    } else if (place === "start") {
+        loadstart();
+    } else if (place === "settings") {
+        loadstgs();
+        loadgeneral();
+    } else if (place === "general") {
+        loadstgs();
+        loadgeneral();
+    } else if (place === "appearance") {
+        loadstgs();
+        loadappearance();
+    } else if (place === "plugins") {
+        loadstgs();
+        loadplugins();
+    } else if (place === "explore") {
+        loadexplore();
+    } else if (place === "inbox") {
+        loadinbox();
+    }
+}
+
+function searchChats(nickname) {
+    for (const chatId in chatCache) {
+      if (chatCache.hasOwnProperty(chatId)) {
+        const chat = chatCache[chatId];
+        if (chat.nickname) {
+          if (chat.nickname.toLowerCase() === nickname.toLowerCase()) {
+            return chat._id;
+          }
+        }
+      }
+    }
+    return null;
+  }
+  
+
+function populateSearch() {
+    const query = document.getElementById("goanywhere").value.toLowerCase();
+    const searchPopulation = document.querySelector('.search-population');
+    if (query !== '') {
+        searchPopulation.innerHTML = '';
+        const usernames = Object.keys(pfpCache).filter(username => username.toLowerCase().includes(query));
+        const groupChats = Object.values(chatCache).filter(chat => chat.nickname && chat.nickname.toLowerCase().includes(query));
+        usernames.forEach(username => {        
+            const item = document.createElement('div');
+            item.innerText = '@' + username
+            item.classList.add('searchitem');
+            item.id = 'srchuser';
+            item.onclick = function() {
+                opendm(username);
+                closemodal();
+            };
+            searchPopulation.appendChild(item);
+        });
+        
+        groupChats.forEach(chat => {        
+            const item = document.createElement('div');
+            item.innerText = chat.nickname
+            item.classList.add('searchitem');
+            item.id = 'srchchat';
+            item.onclick = function() {
+                loadchat(chat._id);
+                closemodal();
+            };
+            searchPopulation.appendChild(item);
+        });
+    } else {
+        searchPopulation.innerHTML = `
+        <div class="searchitem">Search for anything!</div>
+        <div class="searchitem">Use <span id="scil" title="Profile"> !</span><span id="scil" title="DM"> @</span><span id="scil" title="Chat"> #</span> for something specific.</div>
+        `;
+    }
 }
 
 main();
