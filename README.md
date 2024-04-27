@@ -4,6 +4,7 @@ Meo Experimental with plugins re-enabled :)
 ## enhancements over standard meo
 - meo experimental codebase
 - leo plugins beta (currently only has install sources; install from url, plugin repositories and plugin manifests^ coming soon)
+- leo.js library for easier plugin creation
 
 ## planned features
 - additional settings (for plugins and possibly custom css)
