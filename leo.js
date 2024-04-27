@@ -27,7 +27,7 @@ var leo = {
             }
         },
         list: function () {
-            return fetchplugins();
+            return window.fetchplugins();
         }
     },
     session: {
@@ -36,19 +36,19 @@ var leo = {
         },
         reset: function () {
             localStorage.clear();
+            location.reload();
+        }
+    },
+    meower: {
+        logout: function () {
+            window.logout(false);
+            location.reload();
+        },
+        login: function (username, password) {
+            window.login(username, password);
+        },
+        post: function (content) {
+            window.newpost(content);
         }
     }
 };
-
-async function fetchplugins() {
-    try {
-        // remember to bring this back when final
-        //    const response = await fetch('./plugins.json');
-        const response = await fetch('plugins.json');
-        const pluginsdata = await response.json();
-        return pluginsdata;
-    } catch (error) {
-        console.error('Error fetching or parsing plugins data:', error);
-        return [];
-    }
-}

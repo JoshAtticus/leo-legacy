@@ -83,3 +83,27 @@ clear all meo settings and log out.
 leo.session.reset();
 ```
 
+### meower
+interface with meower via leo.meower.(function)
+
+#### logout
+log out of meower
+
+```javascript
+leo.meower.logout();
+```
+
+#### login
+log in to meower
+
+```javascript
+leo.meower.login('username', 'password');
+```
+
+#### post
+post a message to meower as currently signed in user
+
+```javascript
+leo.meower.post('message');
+```
+

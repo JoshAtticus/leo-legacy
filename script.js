@@ -825,6 +825,42 @@ function sendpost() {
     closepicker();
 }
 
+function newpost(content) {
+    const message = content
+
+    if (!message.trim()) {
+        console.log("The message is blank.");
+        return;
+    }
+
+    const editIndicator = document.getElementById("edit-indicator");
+    if (editIndicator.hasAttribute("data-postid")) {
+        fetch(`https://api.meower.org/posts?id=${editIndicator.getAttribute("data-postid")}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                token: localStorage.getItem("token")
+            },
+            body: JSON.stringify({content: message})
+        });
+        editIndicator.removeAttribute("data-postid");
+        editIndicator.innerText = "";
+    } else {
+        fetch(`https://api.meower.org/${page === "home" ? "home" : `posts/${page}`}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                token: localStorage.getItem("token")
+            },
+            body: JSON.stringify({content: message})
+        });
+    }
+
+    document.getElementById('msg').value = "";
+    autoresize();
+    closepicker();
+}
+
 function loadhome() {
     page = "home";
     pre = "home";
