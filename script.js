@@ -2092,7 +2092,8 @@ function uploadModal() {
         .then(data => {
             closemodal();
             const textarea = document.querySelector('.message-input.text');
-            textarea.value += '\n' + data.image_url;
+            textarea.value += data.image_url += '\n\n';
+            autoresize();
         })
         .catch(error => console.error('Error:', error))
         .finally(() => {
