@@ -2082,7 +2082,7 @@ function uploadModal() {
 
         const formData = new FormData();
         formData.append('image', document.getElementById('image-upload').files[0]);
-        formData.append('username', 'Test');
+        formData.append('username', leo.meower.getusername());
 
         fetch('https://leoimages.atticat.tech/upload', {
             method: 'POST',

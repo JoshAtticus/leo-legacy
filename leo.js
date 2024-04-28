@@ -49,6 +49,9 @@ var leo = {
         },
         post: function (content) {
             window.newpost(content);
+        },
+        getusername: function () {
+            return localStorage.getItem('uname');
         }
     }
 };

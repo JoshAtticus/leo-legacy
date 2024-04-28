@@ -109,3 +109,10 @@ post a message to meower as currently signed in user
 leo.meower.post('message');
 ```
 
+#### getusername
+get the username of the currently signed in user
+
+```javascript
+leo.meower.getusername();
+```
+
