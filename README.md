@@ -5,6 +5,7 @@ Meo Experimental with plugins re-enabled :)
 - meo experimental codebase
 - leo plugins beta (currently only has install sources; install from url, plugin repositories and plugin manifests^ coming soon)
 - leo.js library for easier plugin creation
+- image uploads powered by leo images proxy + imgbb
 
 ## planned features
 - additional settings (for plugins and possibly custom css)
