@@ -2042,6 +2042,67 @@ function reportModal(id) {
     }
 }
 
+function uploadModal() {
+    document.documentElement.style.overflow = "hidden";
+
+    const mdlbck = document.querySelector('.modal-back');
+
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+
+        const mdl = mdlbck.querySelector('.modal');
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                <h3>Upload image</h3>
+                <hr class="mdl-hr">
+                <form id="upload-form">
+                    <input type="file" id="image-upload" name="image" accept=".jpg,.jpeg,.png,.bmp,.gif,.tif,.webp,.heic,.avif" required>
+                    <button type="submit" class="modal-button">Upload</button>
+                </form>
+                `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = ``;
+            }
+        }
+    }
+
+    const form = document.getElementById('upload-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Get a reference to the upload button
+        const uploadButton = document.querySelector('.modal-button');
+        // Disable the button and change its text
+        uploadButton.disabled = true;
+        uploadButton.textContent = 'Uploading...';
+
+        const formData = new FormData();
+        formData.append('image', document.getElementById('image-upload').files[0]);
+        formData.append('username', 'Test');
+
+        fetch('https://leoimages.atticat.tech/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            closemodal();
+            const textarea = document.querySelector('.message-input.text');
+            textarea.value += '\n' + data.image_url;
+        })
+        .catch(error => console.error('Error:', error))
+        .finally(() => {
+            // Enable the button and change its text back to "Upload"
+            uploadButton.disabled = false;
+            uploadButton.textContent = 'Upload';
+        });
+    });
+}
+
 function sendReport(id) {
     const data = {
         cmd: "direct",
@@ -2933,7 +2994,7 @@ function createDate(tsmp) {
 }
 
 function uploadImage() {
-    openUpdate("Placeholder!");
+    uploadModal()
 }
 
 function goAnywhere() {
