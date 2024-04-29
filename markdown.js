@@ -58,7 +58,7 @@ function buttonbadges(content) {
         const url = link.getAttribute('href');
         const fileExtension = url.split('.').pop().toLowerCase().split('?')[0];
         const fileDomain = url.includes('tenor.com/view');
-        
+
         if ((['png', 'jpg', 'jpeg', 'webp', 'gif', 'mp4', 'webm', 'mov', 'm4v'].includes(fileExtension)) || fileDomain) {
             link.classList.add('attachment');
             link.innerHTML = '<svg class="icon_ecf39b icon__13ad2" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M10.57 4.01a6.97 6.97 0 0 1 9.86 0l.54.55a6.99 6.99 0 0 1 0 9.88l-7.26 7.27a1 1 0 0 1-1.42-1.42l7.27-7.26a4.99 4.99 0 0 0 0-7.06L19 5.43a4.97 4.97 0 0 0-7.02 0l-8.02 8.02a3.24 3.24 0 1 0 4.58 4.58l6.24-6.24a1.12 1.12 0 0 0-1.58-1.58l-3.5 3.5a1 1 0 0 1-1.42-1.42l3.5-3.5a3.12 3.12 0 1 1 4.42 4.42l-6.24 6.24a5.24 5.24 0 0 1-7.42-7.42l8.02-8.02Z" class=""></path></svg><span> attachments</span>';
@@ -79,7 +79,7 @@ function buttonbadges(content) {
                 'meower_user': /app.meower\.org\/users\/(\w+)/,
                 'meower_share': /meo-32r\.pages\.dev\/share\?id=([\w-]+)/
             };
-            
+
             const socialmedicns = {
                 'twitter': 'twitter_1x.png',
                 'discord_user': 'discord_1x.png',
@@ -92,7 +92,7 @@ function buttonbadges(content) {
                 'meower_user': 'meo_1x.png',
                 'meower_share': 'meo_1x.png'
             };
-    
+
             for (const [platform, regex] of Object.entries(socregex)) {
                 const match = url.match(regex);
                 if (match) {
@@ -104,7 +104,7 @@ function buttonbadges(content) {
             }
         }
     });
-    
+
     return content.innerHTML;
 }
 
@@ -119,22 +119,34 @@ function embed(links) {
 
             let embeddedElement;
 
-            if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp'].includes(fileExtension)) {
+            if (baseURL.includes('go.meower.org')) {
+                fetch(baseURL)
+                    .then(response => {
+                        const contentType = response.headers.get('Content-Type');
+                        if (contentType.startsWith('image/')) {
+                            let imgElement = document.createElement("img");
+                            imgElement.setAttribute("src", link);
+                            imgElement.setAttribute("onclick", `openImage('${link}')`);
+                            imgElement.setAttribute("alt", fileName);
+                            imgElement.classList.add("embed");
+                            embeddedElement = imgElement;
+                        } else if (contentType.startsWith('video/')) {
+                            embeddedElement = document.createElement("video");
+                            embeddedElement.setAttribute("src", baseURL);
+                            embeddedElement.setAttribute("controls", "controls");
+                            embeddedElement.setAttribute("style", "max-width: 300px;");
+                            embeddedElement.setAttribute("alt", fileName);
+                            embeddedElement.classList.add("embed");
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp'].includes(fileExtension)) {
                 let imgElement = document.createElement("img");
                 imgElement.setAttribute("src", link);
                 imgElement.setAttribute("onclick", `openImage('${link}')`);
                 imgElement.setAttribute("alt", fileName);
                 imgElement.classList.add("embed");
-                
-                //var imgLink = document.createElement("a");
-                //imgLink.setAttribute("href", baseURL);
-                //imgLink.setAttribute("target", "_blank");
-                //imgLink.appendChild(imgElement);
-                //embeddedElement = imgLink;
                 embeddedElement = imgElement;
-
-                
-                
             } else if (['mp4', 'webm', 'mov', 'mp3', 'wav', 'ogg', 'mkv'].includes(fileExtension)) {
                 embeddedElement = document.createElement("video");
                 embeddedElement.setAttribute("src", baseURL);
@@ -153,9 +165,9 @@ function embed(links) {
                 } else {
                     match = link.match(youtubeMobRegex);
                 }
-                
+
                 const videoId = match[4];
-                
+
                 embeddedElement = document.createElement("iframe");
                 embeddedElement.setAttribute("width", "100%");
                 embeddedElement.setAttribute("height", "315");
@@ -181,7 +193,7 @@ function embed(links) {
                     embeddedElement.setAttribute("allowfullscreen", "");
                     embeddedElement.setAttribute("allow", "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture");
                     embeddedElement.setAttribute("loading", "lazy");
-                    
+
                     embeddedElement.classList.add("embed");
                 }
             } else if (link.includes('tenor.com')) {
@@ -195,9 +207,9 @@ function embed(links) {
                     embeddedElement.setAttribute('data-postid', postId);
                     embeddedElement.setAttribute('data-share-method', 'host');
                     embeddedElement.setAttribute('data-style', 'width: 100%; height: 100%; border-radius: 5px; max-width: 400px; aspect-ratio: 1 / 1; max-height: 400px;');
-                    
+
                     embeddedElement.classList.add("embed");
-                    
+
                     let scriptTag = document.createElement('script');
                     scriptTag.setAttribute('type', 'text/javascript');
                     scriptTag.setAttribute('src', 'embed.js');
@@ -254,7 +266,7 @@ function createButtonContainer(p) {
         `;
         buttonContainer.querySelector('.toolbarContainer').prepend(nwbtn);
     }
-    
+
     if (localStorage.getItem("permissions") === "1") {
         nwbtn = document.createElement("div");
         nwbtn.classList.add("toolButton");
@@ -299,7 +311,7 @@ function oldMarkdown(content) {
         .replace(/&lt;a:(\w+):(\d+)&gt;/g, '<img src="https://cdn.discordapp.com/emojis/$2.gif?size=96&quality=lossless" alt="$1" width="16px" class="emoji">')
         .replace(/\n/g, '<br>');
 
-        const isEmoji = /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🫠❄️]+$/u.test(content);
+    const isEmoji = /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}🫠❄️]+$/u.test(content);
 
     if (isEmoji) {
         textContent = '<span class="big">' + textContent + '</span>';
