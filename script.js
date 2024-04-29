@@ -922,7 +922,7 @@ function sidebars() {
     <input type='button' class='navigation-button button' id='inbox' value='Inbox' onclick='loadinbox()' aria-label="inbox">
     <input type='button' class='navigation-button button' id='settings' value='Settings' onclick='loadstgs()' aria-label="settings">
     <button type='button' class='user-area button' id='profile' onclick='openUsrModal("${localStorage.getItem("uname")}")' aria-label="profile">
-        <img class="avatar-small" id="uav" src="https://uploads.meower.org/icons/09M4f10bxn4AbvadnNCKZCiP" style="border: 3px solid #b190fe;">
+        <img class="avatar-small" id="uav" src="">
         <span class="gcname">${localStorage.getItem("uname")}</span></div>
     </button>
     `;
@@ -995,6 +995,7 @@ function sidebars() {
                         if (pfpElem) {
                             chatIconElem.src = pfpElem.src;
                             chatIconElem.style.border = pfpElem.style.border.replace("3px", "3px");
+                            chatIconElem.style.background = pfpElem.style.border.replace("3px solid", "");
                             if (pfpElem.classList.contains("svg-avatar")) {
                                 chatIconElem.classList.add("svg-avatar");
                             }
