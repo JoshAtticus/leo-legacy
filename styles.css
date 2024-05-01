@@ -625,6 +625,24 @@ possible future styling
     animation: open cubic-bezier(.2,-.25,0,1) 0.2s forwards;
 }
 
+.modal-small {
+    background-color: var(--modal-color);
+    box-shadow: 0px 5px 10px #000;
+    width: 80%;
+    max-width: 400px;
+    max-height: 50%;
+    padding: var(--padding);
+    height: calc(70% + 55px); /* Updated height value */
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: var(--border-radius);
+    transform: scale(0.5);
+    animation: open cubic-bezier(.2,-.25,0,1) 0.2s forwards;
+}
+
 .modal-close {
     background-color: var(--modal-button-color);
     width: 100%;

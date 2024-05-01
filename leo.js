@@ -42,7 +42,6 @@ var leo = {
     meower: {
         logout: function () {
             window.logout(false);
-            location.reload();
         },
         login: function (username, password) {
             window.login(username, password);

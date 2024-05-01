@@ -1365,6 +1365,7 @@ async function loadplugins() {
     });
 }
 
+
 function loadpluginscript(scriptUrl) {
     const script = document.createElement('script');
     script.src = scriptUrl;
@@ -2043,66 +2044,57 @@ function reportModal(id) {
     }
 }
 
-function uploadModal() {
+function errorModal(header, text) {
     document.documentElement.style.overflow = "hidden";
 
     const mdlbck = document.querySelector('.modal-back');
+    const mdl = mdlbck?.querySelector('.modal');
+    const mdlt = mdl?.querySelector('.modal-top');
+    const mdbt = mdl?.querySelector('.modal-bottom');
 
-    if (mdlbck) {
-        mdlbck.style.display = 'flex';
+    if (mdlbck) mdlbck.style.display = 'flex';
+    if (mdlt) mdlt.innerHTML = `<h3>${header}</h3><hr class="mdl-hr"><span class="subheader">${text}</span>`;
+    if (mdbt) mdbt.innerHTML = ``;
+}
 
-        const mdl = mdlbck.querySelector('.modal');
-        if (mdl) {
-            const mdlt = mdl.querySelector('.modal-top');
-            if (mdlt) {
-                mdlt.innerHTML = `
-                <h3>Upload image</h3>
-                <hr class="mdl-hr">
-                <form id="upload-form">
-                    <input type="file" id="image-upload" name="image" accept=".jpg,.jpeg,.png,.bmp,.gif,.tif,.webp,.heic,.avif" required>
-                    <button type="submit" class="modal-button">Upload</button>
-                </form>
-                `;
-            }
-            const mdbt = mdl.querySelector('.modal-bottom');
-            if (mdbt) {
-                mdbt.innerHTML = ``;
-            }
+function uploadModal() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = ".jpg,.jpeg,.png,.bmp,.gif,.tif,.webp,.heic,.avif";
+    input.multiple = true;
+    input.click();
+
+    input.onchange = function(e) {
+        const files = Array.from(e.target.files);
+        if (files.some(file => file.size > 32 * 1024 * 1024)) {
+            errorModal("File too large", "Please upload files smaller than 32MB.");
+            return;
         }
-    }
 
-    const form = document.getElementById('upload-form');
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+        const textarea = document.querySelector('.message-input.text');
+        textarea.placeholder = `Uploading ${files.length} ${files.length > 1 ? 'images' : 'image'}...`;
 
-        // Get a reference to the upload button
-        const uploadButton = document.querySelector('.modal-button');
-        // Disable the button and change its text
-        uploadButton.disabled = true;
-        uploadButton.textContent = 'Uploading...';
+        const uploads = files.map(file => {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('username', leo.meower.getusername());
 
-        const formData = new FormData();
-        formData.append('image', document.getElementById('image-upload').files[0]);
-        formData.append('username', leo.meower.getusername());
-
-        fetch('https://leoimages.atticat.tech/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            closemodal();
-            const textarea = document.querySelector('.message-input.text');
-            textarea.value += data.image_url += '\n';
-            autoresize();
-        })
-        .catch(error => console.error('Error:', error))
-        .finally(() => {
-            // Enable the button and change its text back to "Upload"
-            uploadButton.disabled = false;
-            uploadButton.textContent = 'Upload';
+            return fetch('https://leoimages.atticat.tech/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => data.image_url) // Just return the URL
+            .catch(error => errorModal("Error uploading image", error));
         });
-    });
+
+        Promise.all(uploads).then(imageUrls => {
+            // Add all the URLs to the textarea
+            textarea.value += imageUrls.join('\n') + '\n';
+            autoresize();
+            textarea.placeholder = "What's on your mind?"; // Reset placeholder
+        });
+    };
 }
 
 function sendReport(id) {
