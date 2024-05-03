@@ -5,9 +5,9 @@
 let end = false;
 let page = "load";
 const sidediv = document.querySelectorAll(".side");
-sidediv.forEach(function (sidediv) {
-    sidediv.classList.add("hidden");
-});
+    sidediv.forEach(function(sidediv) {
+        sidediv.classList.add("hidden");
+    });
 let lul = 0;
 let eul;
 let sul = "";
@@ -22,10 +22,22 @@ const server = "wss://server.meower.org/";
 const pfpCache = {};
 const postCache = {};  // {chatId: [post, post, ...]} (up to 25 posts for inactive chats)
 const chatCache = {}; // {chatId: chat}
+const blockedUsers = {}; // {user, user}
 
-loadsavedplugins();
-loadcstmcss();
-loadcsttme();
+let blockedWords;
+
+if (localStorage.getItem("blockedWords")) {
+    blockedWords = JSON.parse(localStorage.getItem("blockedWords"));
+} else {
+    blockedWords = {};
+}
+
+let lastTyped = 0;
+
+setAccessibilitySettings()
+loadSavedPlugins();
+loadCustomCss();
+loadCustomTheme();
 
 function replsh(rpl) {
     const trimmedString = rpl.length > 25 ?
@@ -38,20 +50,20 @@ function main() {
     meowerConnection = new WebSocket(server);
     let loggedin = false;
 
-    meowerConnection.addEventListener('error', function (event) {
+    meowerConnection.addEventListener('error', function(event) {
         //launch screen
     });
-
+    
     meowerConnection.onclose = (event) => {
         logout(true);
     };
     page = "login";
     loadtheme();
-
+    
     if ('windowControlsOverlay' in navigator) {
         console.log("PWA!!!!");
     }
-
+      
     meowerConnection.onmessage = (event) => {
         console.log("INC: " + event.data);
 
@@ -80,33 +92,41 @@ function main() {
                 login(localStorage.getItem("uname"), localStorage.getItem("token"));
             } else {
                 const pageContainer = document.getElementById("main");
-                pageContainer.innerHTML =
-                    `<div class='settings'>
+                pageContainer.innerHTML = 
+                `<div class='settings'>
                     <div class='login'>
                         <h1>Login</h1>
-                        <input type='text' id='userinput' placeholder='Username' class='login-input text' aria-label="username input">
-                        <input type='password' id='passinput' placeholder='Password' class='login-input text' aria-label="password input">
+                        <input type='text' id='userinput' placeholder='Username' class='login-input text' aria-label="username input" autocomplete="username">
+                        <input type='password' id='passinput' placeholder='Password' class='login-input text' aria-label="password input" autocomplete="current-password">
                         <input type='button' id='login' value='Log in' class='login-input button' onclick='login(document.getElementById("userinput").value, document.getElementById("passinput").value)' aria-label="sign up">
                         <input type='button' id='signup' value='Sign up' class='login-input button' onclick='signup(document.getElementById("userinput").value, document.getElementById("passinput").value)' aria-label="log in">
-                        <small>meo made by eri; leo made by JoshAtticus</small>
+                        <small>This client was made by eri :></small>
                         <div id='msgs'></div>
-                        </div>
-                        <div class='footer'>
-                        <img src="/images/leo.png></img>
+                    </div>
+                    <div class='footer'>
+                        <svg width="80" height="44.25" viewBox="0 0 321 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M124.695 17.2859L175.713 0.216682C184.63 -1.38586 192.437 6.14467 190.775 14.7463L177.15 68.2185C184.648 86.0893 187.163 104.122 187.163 115.032C187.163 143.057 174.929 178 95.4997 178C16.0716 178 3.83691 143.057 3.83691 115.032C3.83691 104.122 6.35199 86.0893 13.8498 68.2185L0.224791 14.7463C-1.43728 6.14467 6.3705 -1.38586 15.2876 0.216682L66.3051 17.2859C74.8856 14.6362 84.5688 13.2176 95.4997 13.429C106.431 13.2176 116.114 14.6362 124.695 17.2859ZM174.699 124.569H153.569V80.6255C153.569 75.6157 151.762 72.1804 146.896 72.1804C143.143 72.1804 139.529 74.6137 135.775 78.3353V124.569H114.785V80.6255C114.785 75.6157 112.977 72.1804 108.112 72.1804C104.22 72.1804 100.744 74.6137 96.9909 78.3353V124.569H76V54.4314H94.4887L96.0178 64.0216C102.134 57.5804 108.39 53 117.148 53C126.462 53 131.605 57.7235 134.107 64.0216C140.224 57.7235 146.896 53 155.376 53C168.026 53 174.699 61.1588 174.699 74.7569V124.569ZM247.618 89.3569C247.618 91.5039 247.479 93.7941 247.201 94.9392H206.331C207.443 105.961 213.838 110.255 223.012 110.255C230.519 110.255 237.887 107.392 245.393 102.955L247.479 118.127C240.111 122.994 231.075 126 220.371 126C199.936 126 185.34 114.835 185.34 89.7863C185.34 66.8843 198.963 53 217.452 53C238.304 53 247.618 69.0314 247.618 89.3569ZM227.6 83.0588C226.905 72.4667 223.29 67.0274 216.896 67.0274C211.057 67.0274 206.887 72.3235 206.192 83.0588H227.6ZM288.054 126C306.96 126 321 111.973 321 89.5C321 67.0274 307.099 53 288.193 53C269.426 53 255.525 67.1706 255.525 89.6431C255.525 112.116 269.287 126 288.054 126ZM288.193 70.749C296.256 70.749 300.704 78.3353 300.704 89.6431C300.704 100.951 296.256 108.537 288.193 108.537C280.269 108.537 275.821 100.808 275.821 89.5C275.821 78.049 280.13 70.749 288.193 70.749Z" fill="#FEFEFE"/>
+                        </svg>
                     </div>
                 </div>
                 `;
             };
         } else if (sentdata.listener == "auth") {
             if (sentdata.val.mode && sentdata.val.mode == "auth") {
+                sentdata.val.payload.relationships.forEach((relationship) => {
+                    if (relationship.state === 2) {
+                        blockedUsers[relationship.username] = true;
+                    }
+                });
                 loggedin = true;
                 if (localStorage.getItem("token") == undefined || localStorage.getItem("uname") == undefined || localStorage.getItem("permissions") == undefined) {
                     localStorage.setItem("uname", sentdata.val.payload.username);
                     localStorage.setItem("token", sentdata.val.payload.token);
                     localStorage.setItem("permissions", sentdata.val.payload.account.permissions);
+
                 }
                 sidebars();
-
+                
                 // work on this
                 if (pre !== "") {
                     if (pre === "home") {
@@ -119,7 +139,7 @@ function main() {
                         loadstgs();
                     } else {
                         loadchat(pre);
-                    }
+                    }                
                 } else if (!settingsstuff().homepage) {
                     loadstart();
                 } else {
@@ -202,7 +222,7 @@ function main() {
             const r = document.createElement("button");
             r.id = chat._id;
             r.className = `navigation-button button gcbtn`;
-            r.onclick = function () {
+            r.onclick = function() {
                 loadchat(chat._id);
             };
             if (chat.type === 1) {
@@ -215,9 +235,9 @@ function main() {
                 chatIconElem.src = "images/GC.svg";
             } else {
                 loadPfp(chat.members.find(v => v !== localStorage.getItem("uname")))
-                    .then(pfpElem => {
-                        chatIconElem.src = pfpElem.src;
-                    });
+                .then(pfpElem => {
+                    chatIconElem.src = pfpElem.src;
+                });
             }
             r.appendChild(chatIconElem);
 
@@ -225,7 +245,7 @@ function main() {
             chatNameElem.classList.add("gcname");
             chatNameElem.innerText = chat.nickname || `@${chat.members.find(v => v !== localStorage.getItem("uname"))}`;
             r.appendChild(chatNameElem);
-
+    
             const gcs = document.getElementsByClassName("gcs");
             if (gcs.length > 0) {
                 gcs[0].appendChild(r);
@@ -255,13 +275,13 @@ function main() {
             sul = iul.trim().split(";");
             eul = sul;
             lul = sul.length - 1;
-
+            
             if (sul.length > 1) {
                 sul = sul.slice(0, -2).join(", ") + (sul.length > 2 ? ", " : "") + sul.slice(-2).join(".");
             } else {
                 sul = sul[0];
             }
-
+        
             if (page == "home") {
                 document.getElementById("info").innerText = lul + " users online (" + sul + ")";
             }
@@ -297,38 +317,46 @@ function main() {
             } else {
                 console.warn(sentdata.val.id, "not found.");
             }
+        } else if (sentdata.listener == "chpw") {
+            if (sentdata.val === 'I:100 | OK') {
+                closemodal("Your password has been updated!")
+            }
         }
     };
-    document.addEventListener("keydown", function (event) {
+    document.addEventListener("keydown", function(event) {
         if (page !== "settings" && page !== "explore" && page !== "login" && page !== "start") {
+            const textarea = document.getElementById("msg");
             if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                if (document.getElementById('msg') === document.activeElement) {
+                if (textarea === document.activeElement) {
                     event.preventDefault();
                     sendpost();
-                    const textarea = document.getElementById('msg');
                     textarea.style.height = 'auto';
                 } else {
                     if (opened === 1) {
                         fstemj();
-                        document.getElementById("msg").focus();
+                        textarea.focus();
                     }
                 }
-            } else if (event.key === "Enter" && event.shiftKey) {
             } else if (event.key === "Escape") {
                 closemodal();
                 closeImage();
-                if (opened === 1) {
+                if (opened===1) {
                     closepicker();
                 }
                 const editIndicator = document.getElementById("edit-indicator");
                 if (editIndicator.hasAttribute("data-postid")) {
                     editIndicator.removeAttribute("data-postid");
                     editIndicator.innerText = "";
-                    document.getElementById('msg').value = "";
+                    textarea.value = "";
                     autoresize();
                 }
-                document.getElementById("msg").blur();
+                textarea.blur();
+            } else if (event.keyCode >= 48 && event.keyCode <= 90 && textarea === document.activeElement && !settingsstuff().invtyping && lastTyped+3000 < Date.now()) {
+                lastTyped = Date.now();
+                fetch(`https://api.meower.org/${page === "home" ? "" : "chats/"}${page}/typing`, {
+                    method: "POST",
+                    headers: { token: localStorage.getItem("token") }
+                });
             }
         }
     });
@@ -353,8 +381,18 @@ function main() {
             }
         } else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
             if (!document.activeElement || (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA')) {
-                document.getElementById("msg").focus();
+                if (page !== "settings" && page !== "explore" && page !== "login" && page !== "start") {
+                    document.getElementById("msg").focus();
+                }
             }
+        } else if ((event.ctrlKey || event.metaKey) && event.key === 'u') {
+            if (page !== "settings" && page !== "explore" && page !== "login" && page !== "start") {
+                event.preventDefault();
+                uploadImage();
+            }
+        } else if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+            event.preventDefault();
+            goAnywhere();
         }
     });
 }
@@ -362,6 +400,7 @@ function main() {
 function loadpost(p) {
     let user
     let content
+
     if (p.u == "Discord" || p.u == "SplashBridge") {
         const rcon = settingsstuff().swearfilter && p.unfiltered_p ? p.unfiltered_p : p.p;
         const parts = rcon.split(': ');
@@ -371,19 +410,45 @@ function loadpost(p) {
         content = settingsstuff().swearfilter && p.unfiltered_p ? p.unfiltered_p : p.p;
         user = p.u;
     }
-
+    
     const postContainer = document.createElement("div");
     postContainer.classList.add("post");
     postContainer.setAttribute("tabindex", "0");
+
+    const ba = Object.keys(blockedWords);
+    const bc = ba.some(word => {
+        const regex = new RegExp('\\b' + word + '\\b', 'i');
+        return regex.test(content);
+    });
+
+    if (bc) {
+        if (settingsstuff().censorwords) {
+            content = content.replace(new RegExp('\\b(' + ba.join('|') + ')\\b', 'gi'), match => '*'.repeat(match.length));
+        } else {
+            if (settingsstuff().blockedmessages) {
+                postContainer.setAttribute("style", "display:none;");
+            } else {
+                postContainer.classList.add("blocked");
+            }
+        }
+    }
+    
+    if (blockedUsers.hasOwnProperty(user)) {
+        if (settingsstuff().blockedmessages) {
+            postContainer.setAttribute("style", "display:none;");
+        } else {
+            postContainer.classList.add("blocked");
+        }
+    }
 
     const wrapperDiv = document.createElement("div");
     wrapperDiv.classList.add("wrapper");
 
     const pfpDiv = document.createElement("div");
     pfpDiv.classList.add("pfp");
-
+    
     wrapperDiv.appendChild(createButtonContainer(p));
-
+    
     const mobileButtonContainer = document.createElement("div");
     mobileButtonContainer.classList.add("mobileContainer");
     mobileButtonContainer.innerHTML = `
@@ -393,7 +458,7 @@ function loadpost(p) {
         </div>
     </div>
     `;
-
+    
     wrapperDiv.appendChild(mobileButtonContainer);
 
     const pstdte = document.createElement("i");
@@ -414,7 +479,7 @@ function loadpost(p) {
         bridged.setAttribute("title", "This post has been bridged from another platform.");
         pstinf.appendChild(bridged);
     }
-
+    
     pstinf.appendChild(pstdte);
     wrapperDiv.appendChild(pstinf);
 
@@ -423,18 +488,18 @@ function loadpost(p) {
     if (match) {
         const replyid = match[3];
         const pageContainer = document.getElementById("msgs");
-
+    
         if (pageContainer.firstChild) {
             pageContainer.insertBefore(postContainer, pageContainer.firstChild);
         } else {
             pageContainer.appendChild(postContainer);
         }
-
+        
         loadreply(p.post_origin, replyid).then(replycontainer => {
             pstinf.after(replycontainer);
             //wrapperDiv.appendChild(replycontainer);
         });
-
+    
         content = content.replace(match[0], '').trim();
     }
     let postContentText = document.createElement("p");
@@ -455,10 +520,10 @@ function loadpost(p) {
     if (emojiRgx.test(content) || discordRgx.test(content)) {
         postContentText.classList.add('big');
     }
-
+    
     if (content) {
         wrapperDiv.appendChild(postContentText);
-    }
+    } 
 
     const links = content.match(/(?:https?|ftp):\/\/[^\s(){}[\]]+/g);
     const embd = embed(links);
@@ -505,7 +570,7 @@ function loadPfp(username, button) {
                     if (userData.avatar) {
                         const pfpurl = `https://uploads.meower.org/icons/${userData.avatar}`;
 
-
+                        
                         pfpElement = document.createElement("img");
                         pfpElement.setAttribute("src", pfpurl);
                         pfpElement.setAttribute("alt", username);
@@ -514,17 +579,17 @@ function loadPfp(username, button) {
                         if (!button) {
                             pfpElement.setAttribute("onclick", `openUsrModal('${username}')`);
                         }
-
+                        
                         if (userData.avatar_color) {
-                            //                            if (userData.avatar_color === "!color") {
-                            //                                pfpElement.style.border = `3px solid #f00`;
-                            //                                pfpElement.style.backgroundColor = `#f00`;
-                            //                            } else {
-                            //                            }
+//                            if (userData.avatar_color === "!color") {
+//                                pfpElement.style.border = `3px solid #f00`;
+//                                pfpElement.style.backgroundColor = `#f00`;
+//                            } else {
+//                            }
                             pfpElement.style.border = `3px solid #${userData.avatar_color}`;
                             pfpElement.style.backgroundColor = `#${userData.avatar_color}`;
                         }
-
+                        
                         pfpElement.addEventListener('error', () => {
                             pfpElement.setAttribute("src", `${pfpurl}.png`);
                             pfpCache[username].setAttribute("src", `${pfpurl}.png`);
@@ -537,7 +602,7 @@ function loadPfp(username, button) {
                         } else {
                             pfpurl = `images/avatars/icon_err.svg`;
                         }
-
+                        
                         pfpElement = document.createElement("img");
                         pfpElement.setAttribute("src", pfpurl);
                         pfpElement.setAttribute("alt", username);
@@ -551,10 +616,10 @@ function loadPfp(username, button) {
                         if (userData.avatar_color) {
                             pfpElement.style.border = `3px solid #${userData.avatar_color}`;
                         }
-
+                        
                     } else {
                         const pfpurl = `images/avatars/icon_-4.svg`;
-
+                        
                         pfpElement = document.createElement("img");
                         pfpElement.setAttribute("src", pfpurl);
                         pfpElement.setAttribute("alt", username);
@@ -564,7 +629,7 @@ function loadPfp(username, button) {
                         }
                         pfpElement.classList.add("avatar");
                         pfpElement.classList.add("svg-avatar");
-
+                        
                         pfpElement.style.border = `3px solid #fff`;
                         pfpElement.style.backgroundColor = `#fff`;
                     }
@@ -583,91 +648,6 @@ function loadPfp(username, button) {
     });
 }
 
-function loadPfpstraight(username, button) {
-    return new Promise((resolve, reject) => {
-        let pfpElement;
-
-        fetch(`https://api.meower.org/users/${username}`)
-            .then(userResp => userResp.json())
-            .then(userData => {
-                if (userData.avatar) {
-                    const pfpurl = `https://uploads.meower.org/icons/${userData.avatar}`;
-
-                    pfpElement = document.createElement("img");
-                    pfpElement.setAttribute("src", pfpurl);
-                    pfpElement.setAttribute("alt", username);
-                    pfpElement.setAttribute("data-username", username);
-                    pfpElement.classList.add("avatar-small");
-                    if (!button) {
-                        pfpElement.setAttribute("onclick", `openUsrModal('${username}')`);
-                    }
-
-                    if (userData.avatar_color) {
-                        pfpElement.style.border = `3px solid #${userData.avatar_color}`;
-                        pfpElement.style.backgroundColor = `#${userData.avatar_color}`;
-                    }
-
-                    pfpElement.addEventListener('error', () => {
-                        pfpElement.setAttribute("src", `${pfpurl}.png`);
-                    });
-
-                } else if (userData.pfp_data) {
-                    let pfpurl;
-                    if (userData.pfp_data > 0 && userData.pfp_data <= 37) {
-                        pfpurl = `images/avatars/icon_${userData.pfp_data - 1}.svg`;
-                    } else {
-                        pfpurl = `images/avatars/icon_err.svg`;
-                    }
-
-                    pfpElement = document.createElement("img");
-                    pfpElement.setAttribute("src", pfpurl);
-                    pfpElement.setAttribute("alt", username);
-                    pfpElement.setAttribute("data-username", username);
-                    pfpElement.classList.add("avatar-small");
-                    if (!button) {
-                        pfpElement.setAttribute("onclick", `openUsrModal('${username}')`);
-                    }
-                    pfpElement.classList.add("svg-avatar");
-
-                    if (userData.avatar_color) {
-                        if (userData.avatar_color === "!color") {
-                            pfpElement.style.border = `3px solid #f00`;
-                            pfpElement.style.backgroundColor = `#f00`;
-                        } else {
-                            pfpElement.style.border = `3px solid #${userData.avatar_color}`;
-                            pfpElement.style.backgroundColor = `#${userData.avatar_color}`;
-                        }
-                    }
-
-                } else {
-                    const pfpurl = `images/avatars/icon_-4.svg`;
-
-                    pfpElement = document.createElement("img");
-                    pfpElement.setAttribute("src", pfpurl);
-                    pfpElement.setAttribute("alt", username);
-                    pfpElement.setAttribute("data-username", username);
-                    if (!button) {
-                        pfpElement.setAttribute("onclick", `openUsrModal('${username}')`);
-                    }
-                    pfpElement.classList.add("avatar");
-                    pfpElement.classList.add("svg-avatar");
-
-                    pfpElement.style.border = `3px solid #fff`;
-                    pfpElement.style.backgroundColor = `#fff`;
-
-                    console.error("No avatar or pfp_data available for: ", username);
-                    resolve(null);
-                }
-
-                resolve(pfpElement);
-            })
-            .catch(error => {
-                console.error("Failed to fetch:", error);
-                resolve(null);
-            });
-    });
-}
-
 async function loadreply(postOrigin, replyid) {
     const replyregex = /^@[^ ]+ (.+?) \(([^)]+)\)/;
     try {
@@ -682,12 +662,12 @@ async function loadreply(postOrigin, replyid) {
         const replycontainer = document.createElement("div");
         replycontainer.classList.add("reply");
         let replyContent = replydata.p;
-
+        
         const match = replydata.p.replace(replyregex, "").trim();
         if (match) {
             replyContent = match;
         }
-
+        
         if (replydata.u === "Discord" || replydata.u === "SplashBridge") {
             const rcon = replyContent;
             const parts = rcon.split(': ');
@@ -697,7 +677,7 @@ async function loadreply(postOrigin, replyid) {
         } else {
             replycontainer.innerHTML = `<p style='font-weight:bold;margin: 10px 0 10px 0;'>${escapeHTML(replydata.u)}</p><p style='margin: 10px 0 10px 0;'>${escapeHTML(replyContent)}</p>`;
         }
-
+        
         return replycontainer;
     } catch (error) {
         console.error("Error fetching reply:", error);
@@ -710,13 +690,13 @@ function reply(event) {
     if (postContainer) {
         const username = postContainer.querySelector('#username').innerText;
         const postcont = postContainer.querySelector('p').innerText
-            .replace(/\n/g, ' ')
-            .replace(/@\w+/g, '')
-            .split(' ')
-            .slice(0, 6)
-            .join(' ');
+        .replace(/\n/g, ' ')
+        .replace(/@\w+/g, '')
+        .split(' ')
+        .slice(0, 6)
+        .join(' ');
         const ogmsg = document.getElementById('msg').value
-
+        
         const postId = postContainer.id;
         document.getElementById('msg').value = `@${username} "${postcont}..." (${postId})\n${ogmsg}`;
         document.getElementById('msg').focus();
@@ -737,14 +717,14 @@ function pingusr(event) {
 
 function loadtheme() {
     const theme = localStorage.getItem("theme");
-
+    
     if (theme) {
         document.documentElement.classList.add(theme + "-theme");
     }
-
+    
     const rootStyles = window.getComputedStyle(document.documentElement);
     const rootBackgroundColor = rootStyles.getPropertyValue('--background');
-
+    
     const metaThemeColor = document.querySelector("meta[name=theme-color]");
     if (metaThemeColor) {
         metaThemeColor.setAttribute("content", rootBackgroundColor);
@@ -753,7 +733,7 @@ function loadtheme() {
 
 function sharepost() {
     const postId = event.target.closest('.post').id;
-    window.open(`https://leo.atticat.tech/share?id=${postId}`, '_blank');
+    window.open(`https://meo-32r.pages.dev/share?id=${postId}`, '_blank');
 }
 
 function login(user, pass) {
@@ -805,7 +785,7 @@ function sendpost() {
                 "Content-Type": "application/json",
                 token: localStorage.getItem("token")
             },
-            body: JSON.stringify({ content: message })
+            body: JSON.stringify({content: message})
         });
         editIndicator.removeAttribute("data-postid");
         editIndicator.innerText = "";
@@ -816,43 +796,7 @@ function sendpost() {
                 "Content-Type": "application/json",
                 token: localStorage.getItem("token")
             },
-            body: JSON.stringify({ content: message })
-        });
-    }
-
-    document.getElementById('msg').value = "";
-    autoresize();
-    closepicker();
-}
-
-function newpost(content) {
-    const message = content
-
-    if (!message.trim()) {
-        console.log("The message is blank.");
-        return;
-    }
-
-    const editIndicator = document.getElementById("edit-indicator");
-    if (editIndicator.hasAttribute("data-postid")) {
-        fetch(`https://api.meower.org/posts?id=${editIndicator.getAttribute("data-postid")}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                token: localStorage.getItem("token")
-            },
-            body: JSON.stringify({ content: message })
-        });
-        editIndicator.removeAttribute("data-postid");
-        editIndicator.innerText = "";
-    } else {
-        fetch(`https://api.meower.org/${page === "home" ? "home" : `posts/${page}`}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                token: localStorage.getItem("token")
-            },
-            body: JSON.stringify({ content: message })
+            body: JSON.stringify({content: message})
         });
     }
 
@@ -870,9 +814,9 @@ function loadhome() {
         <div class='info'><h1 class='header-top'>Home</h1><p id='info'></p>
         </div>` + loadinputs();
     document.getElementById("info").innerText = lul + " users online (" + sul + ")";
-
+    
     sidebars();
-
+    
     if (postCache["home"]) {
         postCache["home"].forEach(post => {
             if (page !== "home") {
@@ -916,43 +860,43 @@ function sidebars() {
     </div>
     </div>
     `;
-
+    
     let navlist = `
     <input type='button' class='navigation-button button' id='explore' value='Explore' onclick='loadexplore();' aria-label="explore">
     <input type='button' class='navigation-button button' id='inbox' value='Inbox' onclick='loadinbox()' aria-label="inbox">
     <input type='button' class='navigation-button button' id='settings' value='Settings' onclick='loadstgs()' aria-label="settings">
     <button type='button' class='user-area button' id='profile' onclick='openUsrModal("${localStorage.getItem("uname")}")' aria-label="profile">
-        <img class="avatar-small" id="uav" src="">
+        <img class="avatar-small" id="uav" src="" alt="Avatar">
         <span class="gcname">${localStorage.getItem("uname")}</span></div>
     </button>
     `;
 
     loadPfp(localStorage.getItem("uname"))
-        .then(pfpElem => {
-            if (pfpElem) {
-                const userAvatar = document.getElementById("uav");
-                userAvatar.src = pfpElem.src;
-                userAvatar.style.border = pfpElem.style.border.replace("3px", "3px");
-                if (pfpElem.classList.contains("svg-avatar")) {
-                    userAvatar.classList.add("svg-avatar");
-                }
+    .then(pfpElem => {
+        if (pfpElem) {
+            const userAvatar = document.getElementById("uav");
+            userAvatar.src = pfpElem.src;
+            userAvatar.style.border = pfpElem.style.border.replace("3px", "3px");
+            if (pfpElem.classList.contains("svg-avatar")) {
+                userAvatar.classList.add("svg-avatar");
             }
-        });
+        }
+    });
 
     if (localStorage.getItem("permissions") === "1") {
-        navlist = `<input type='button' class='navigation-button button' id='moderation' value='Moderate' onclick='openModModal()' aria-label="moderate">` + navlist;
+    navlist = `<input type='button' class='navigation-button button' id='moderation' value='Moderate' onclick='openModModal()' aria-label="moderate">` + navlist;
     }
 
     let mdmdl = document.getElementsByClassName('navigation')[0];
     mdmdl.innerHTML += navlist;
-
+//make it check if the list already exists, if so dont do this
     const char = new XMLHttpRequest();
     char.open("GET", "https://api.meower.org/chats?autoget");
     char.setRequestHeader("token", localStorage.getItem('token'));
     char.onload = async () => {
         const response = JSON.parse(char.response);
         console.log(char.response);
-
+    
         const groupsdiv = document.getElementById("groups");
         const gcdiv = document.createElement("div");
         gcdiv.className = "gcs";
@@ -975,15 +919,13 @@ function sidebars() {
             const r = document.createElement("button");
             r.id = chat._id;
             r.className = `navigation-button button gcbtn`;
-            r.onclick = function () {
+            r.onclick = function() {
                 loadchat(chat._id);
             };
-            if (chat.type === 1) {
-                console.log(loadPfp(chat.members.find(v => v !== localStorage.getItem("uname"))).src);
-            }
 
             const chatIconElem = document.createElement("img");
             chatIconElem.classList.add("avatar-small");
+            chatIconElem.setAttribute("alt", "Avatar");;
             if (chat.type === 0) {
                 chatIconElem.src = "images/GC.svg";
                 chatIconElem.style.border = "3px solid #1f5831";
@@ -991,27 +933,26 @@ function sidebars() {
                 // this is so hacky :p
                 // - Tnix
                 loadPfp(chat.members.find(v => v !== localStorage.getItem("uname")))
-                    .then(pfpElem => {
-                        if (pfpElem) {
-                            chatIconElem.src = pfpElem.src;
-                            chatIconElem.style.border = pfpElem.style.border.replace("3px", "3px");
-                            chatIconElem.style.background = pfpElem.style.border.replace("3px solid", "");
-                            if (pfpElem.classList.contains("svg-avatar")) {
-                                chatIconElem.classList.add("svg-avatar");
-                            }
+                .then(pfpElem => {
+                    if (pfpElem) {
+                        chatIconElem.src = pfpElem.src;
+                        chatIconElem.style.border = pfpElem.style.border.replace("3px", "3px");
+                        chatIconElem.style.background = pfpElem.style.border.replace("3px solid", "");
+                        if (pfpElem.classList.contains("svg-avatar")) {
+                            chatIconElem.classList.add("svg-avatar");
+                            chatIconElem.style.background = '#fff';
                         }
-                        console.log(pfpElem);
-                    });
+                    }
+                    console.log(pfpElem);
+                });
             }
-            console.log(chatIconElem)
-
             r.appendChild(chatIconElem);
 
             const chatNameElem = document.createElement("span");
             chatNameElem.classList.add("gcname");
             chatNameElem.innerText = chat.nickname || `@${chat.members.find(v => v !== localStorage.getItem("uname"))}`;
             r.appendChild(chatNameElem);
-
+    
             gcdiv.appendChild(r);
         });
 
@@ -1021,7 +962,7 @@ function sidebars() {
     char.send();
 
     const sidediv = document.querySelectorAll(".side");
-    sidediv.forEach(function (sidediv) {
+    sidediv.forEach(function(sidediv) {
         sidediv.classList.remove("hidden");
     });
 }
@@ -1041,43 +982,46 @@ function loadstart() {
         <div class="quick-btns">
         <div class="qc-bts-sc">
         <button class="qbtn button" aria-label="create chat" onclick="createChatModal()">Create Chat</button>
-        <button class="qbtn button" aria-label="create chat" onclick="loadhome();">Go Home</button>
+        <button class="qbtn button" aria-label="home" onclick="loadhome();">Go Home</button>
         </div>
         <div class="qc-bts-sc">
-        <button class="qbtn button" aria-label="create chat" onclick="loadexplore();">Explore</button>
-        <button class="qbtn button" aria-label="create chat" onclick="opendm('JoshAtticus')">DM Me :)</button>
+        <button class="qbtn button" aria-label="explore" onclick="loadexplore();">Explore</button>
+        <button class="qbtn button" aria-label="dm me" onclick="opendm('Eris')">DM Me :)</button>
+        </div>
+        <div class="qc-bts-sc">
+        <button class="qbtn button" aria-label="share" onclick="shareModal()">Invite People</button>
         </div>
     </div>
     `;
     fetch('https://api.meower.org/ulist?autoget')
-        .then(response => response.json())
-        .then(data => {
-            data.autoget.forEach(item => {
-                const gr = item._id.trim();
-                if (gr !== localStorage.getItem("uname")) {
-                    const profilecont = document.createElement('div');
-                    profilecont.classList.add('mdl-sec');
-                    if (item.avatar_color !== "!color" && data.avatar_color) {
-                        profilecont.classList.add('custom-bg');
-                    }
-                    if (item.avatar) {
-                        profilecont.innerHTML = `
-                        <img class="avatar-small" style="border: 3px solid #${item.avatar_color}; background-color:#${item.avatar_color};" src="https://uploads.meower.org/icons/${item.avatar}" alt="${item._id}" title="${item._id}"></img>
-                    `;
-                    } else if (item.pfp_data) {
-                        profilecont.innerHTML = `
-                        <img class="avatar-small svg-avatar" style="border: 3px solid #${item.avatar_color}"; src="images/avatars/icon_${item.pfp_data - 1}.svg" alt="${item._id}" title="${item._id}"></img>
-                    `;
-                    } else {
-                        profilecont.innerHTML = `
-                        <img class="avatar-small svg-avatar" style="border: 3px solid #000"; src="images/avatars/icon_-4.svg" alt="${item._id}" title="${item._id}"></img>
-                    `;
-                    }
-                    const pl = `<button class="ubtn button" aria-label="${gr}"><div class="ubtnsa" onclick="openUsrModal('${gr}')">${profilecont.outerHTML}${gr}</div><div class="ubtnsb" onclick="opendm('${gr}')" id="username"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22a10 10 0 1 0-8.45-4.64c.13.19.11.44-.04.61l-2.06 2.37A1 1 0 0 0 2.2 22H12Z" class=""></path></svg></div></button>`;
-                    document.querySelector(".start-users-online").innerHTML += pl;
+    .then(response => response.json())
+    .then(data => {
+        data.autoget.forEach(item => {
+            const gr = item._id.trim();
+            if (gr !== localStorage.getItem("uname")) {
+                const profilecont = document.createElement('div');
+                profilecont.classList.add('mdl-sec');
+                if (item.avatar_color !== "!color" && data.avatar_color) {
+                    profilecont.classList.add('custom-bg');
                 }
-            });
+                if (item.avatar) {
+                    profilecont.innerHTML = `
+                        <img class="avatar-small" style="border: 3px solid #${item.avatar_color}; background-color:#${item.avatar_color};" src="https://uploads.meower.org/icons/${item.avatar}" alt="Avatar" title="${item._id}"></img>
+                    `;
+                } else if (item.pfp_data) {
+                    profilecont.innerHTML = `
+                        <img class="avatar-small svg-avatar" style="border: 3px solid #${item.avatar_color}"; src="images/avatars/icon_${item.pfp_data - 1}.svg" alt="Avatar" title="${item._id}"></img>
+                    `;
+                } else {
+                    profilecont.innerHTML = `
+                        <img class="avatar-small svg-avatar" style="border: 3px solid #000"; src="images/avatars/icon_-4.svg" alt="Avatar" title="${item._id}"></img>
+                    `;
+                }
+                const pl = `<button class="ubtn button" aria-label="${gr}"><div class="ubtnsa" onclick="openUsrModal('${gr}')">${profilecont.outerHTML}${gr}</div><div class="ubtnsb" onclick="opendm('${gr}')" id="username"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22a10 10 0 1 0-8.45-4.64c.13.19.11.44-.04.61l-2.06 2.37A1 1 0 0 0 2.2 22H12Z" class=""></path></svg></div></button>`;
+                document.querySelector(".start-users-online").innerHTML += pl;
+            }
         });
+    });
 
 }
 
@@ -1088,20 +1032,20 @@ function opendm(username) {
             'token': localStorage.getItem("token")
         }
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            chatCache[data._id] = data;
-            parent.loadchat(data._id);
-            parent.closemodal();
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        chatCache[data._id] = data;
+        parent.loadchat(data._id);
+        parent.closemodal();
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
 }
 
 function loadchat(chatId) {
@@ -1110,30 +1054,30 @@ function loadchat(chatId) {
 
     if (!chatCache[chatId]) {
         fetch(`https://api.meower.org/chats/${chatId}`, {
-            headers: { token: localStorage.getItem("token") }
+            headers: {token: localStorage.getItem("token")}
         })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error("Chat not found");
-                    } else {
-                        throw new Error('Network response was not ok');
-                    }
-                }
-                return response.json();
-            })
-            .then(data => {
-                chatCache[chatId] = data;
-                loadchat(chatId);
-            })
-            .catch(e => {
-                openUpdate(`Unable to open chat: ${e}`);
-                if (!settingsstuff().homepage) {
-                    loadstart();
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("Chat not found");
                 } else {
-                    loadhome();
+                    throw new Error('Network response was not ok');
                 }
-            });
+            }
+            return response.json();
+        })
+        .then(data => {
+            chatCache[chatId] = data;
+            loadchat(chatId);
+        })
+        .catch(e => {
+            openUpdate(`Unable to open chat: ${e}`);
+            if (!settingsstuff().homepage) {
+                loadstart();
+            } else {
+                loadhome();
+            }
+        });
         return;
     }
 
@@ -1158,7 +1102,7 @@ function loadchat(chatId) {
         </svg>            
         `;
     } else {
-        mainContainer.innerHTML = `<div class='info'><h1 id='nickname'>${data.members.find(v => v !== localStorage.getItem("uname"))}<i class="subtitle">${chatId}</i></h1><p id='info'></p></div>` + loadinputs();
+        mainContainer.innerHTML = `<div class='info'><h1 id='username' onclick="openUsrModal('${data.members.find(v => v !== localStorage.getItem("uname"))}')">${data.members.find(v => v !== localStorage.getItem("uname"))}<i class="subtitle">${chatId}</i></h1><p id='info'></p></div>` + loadinputs();
     }
 
     if (postCache[chatId]) {
@@ -1209,6 +1153,8 @@ function loadinbox() {
             <div id='msgs' class='posts'></div>
         `;
 
+        sidebars();
+
         const sidedivs = document.querySelectorAll(".side");
         sidedivs.forEach(sidediv => sidediv.classList.remove("hidden"));
 
@@ -1239,6 +1185,7 @@ function logout(iskl) {
     for (const key in pfpCache) delete pfpCache[key];
     for (const key in postCache) delete postCache[key];
     for (const key in chatCache) delete chatCache[key];
+    for (const key in blockedUsers) delete blockedUsers[key];
     if (document.getElementById("msgs"))
         document.getElementById("msgs").innerHTML = "";
     if (document.getElementById("nav"))
@@ -1256,7 +1203,7 @@ function loadstgs() {
     navc.innerHTML = `
     <input type='button' class='navigation-button button' id='submit' value='General' onclick='loadgeneral()' aria-label="general">
     <input type='button' class='navigation-button button' id='submit' value='Appearance' onclick='loadappearance()' aria-label="appearance">
-    <input type="button" class="navigation-button button" id="submit" value="Plugins (Beta)" onclick="loadplugins()" aria-label="plugins">
+    <input type="button" class="navigation-button button" id="submit" value="Plugins" onclick="loadplugins()" aria-label="plugins">
     <input type='button' class='navigation-button button' id='logout' value='Logout' onclick='logout(false)' aria-label="logout">
     `;
     loadgeneral();
@@ -1269,55 +1216,189 @@ function loadgeneral() {
             <h1>General</h1>
             <h3>Chat</h3>
             <div class="msgs"></div>
-            <div class="stg-section">
-            <label>
-            Auto-navigate to Home
-            <input type="checkbox" id="homepage" class="settingstoggle">
-            <p class="subsubheader">Instead of showing you the Start Page you get directly taken to home</p>
-            </label>
+            <div class='stg-section' style="display:none;">
+                <label>
+                    Disable swear filter
+                    <input type="checkbox" id="swearfilter" class="settingstoggle">
+                    <p class="subsubheader">This should just be enabled by default</p>
+                </label>
             </div>
             <div class="stg-section">
-            <label>
-            Disable console warning
-            <input type="checkbox" id="consolewarnings" class="settingstoggle">
-            <p class="subsubheader">Hides warning message from console</p>
-            </label>
+                <label>
+                    Auto-navigate to Home
+                    <input type="checkbox" id="homepage" class="settingstoggle">
+                    <p class="subsubheader">Instead of showing you the Start Page you get directly taken to home</p>
+                </label>
+            </div>
+            <div class="stg-section">
+                <label>
+                    Invisible typing
+                    <input type="checkbox" id="invtyping" class="settingstoggle">
+                    <p class="subsubheader">Other users won't see you typing</p>
+                </label>
+            </div>
+            <div class="stg-section">
+                <label>
+                    Allow images from any source
+                    <input type="checkbox" id="imagewhitelist" class="settingstoggle">
+                    <p class="subsubheader">This allows any site to see your IP, use responsibly</p>
+                </label>
+            </div>
+            <div class="stg-section">
+                <label>
+                    Special embeds
+                    <input type="checkbox" id="embeds" class="settingstoggle">
+                    <p class="subsubheader">Embeds Tenor GIFS, Youtube Videos, ect. (Uses 3rd party cookies)</p>
+                </label>
+            </div>
+            <div class="stg-section">
+                <label>
+                    Hide blocked user messages
+                    <input type="checkbox" id="blockedmessages" class="settingstoggle">
+                    <p class="subsubheader">Show a warning or hide messages completely</p>
+                </label>
+            </div>
+            <div class="stg-section">
+                <label>
+                    Censor blacklisted words
+                    <input type="checkbox" id="censorwords" class="settingstoggle">
+                    <p class="subsubheader">Censors words instead of treating them like a blocked message</p>
+                </label>
+            </div>
+            <h3>Accessibility</h3>
+            <div class="stg-section">
+                <label>
+                    Reduce motion
+                    <input type="checkbox" id="reducemotion" class="settingstoggle">
+                    <p class="subsubheader">Reduce the intensity of animations and other moving effects</p>
+                </label>
+            </div>
+            <div class="stg-section">
+                <label>
+                    Always underline links
+                    <input type="checkbox" id="underlinelinks" class="settingstoggle">
+                    <p class="subsubheader">Make links to websites and other pages stand out more by underlining them</p>
+                </label>
+            </div>
+            <h3>Miscellaneous</h3>
+            <div class="stg-section">
+                <label>
+                    Disable console warning
+                    <input type="checkbox" id="consolewarnings" class="settingstoggle">
+                    <p class="subsubheader">Hides warning message from console</p>
+                </label>
+            </div>
+            <h3>Account</h3>
+            <button onclick="deleteTokensModal()" class="button blockeduser">Clear Tokens</button>
+            <button onclick="changePasswordModal()" class="button blockeduser">Change Password</button>
+            <button onclick="clearLocalstorageModal()" class="button blockeduser">Clear Localstorage</button>
+            <button onclick="DeleteAccountModal1()" class="button blockeduser" style="background:var(--red);color:#fefefe;">Delete Account</button>
+            <h3>Blocks</h3>
+            <div class="blockedusers customcss">
+            <button class="blockeduser button" onclick="blockUserSel()">Block User</button>
+            </div>
+            <h3>Blacklisted Words</h3>
+            <div class="blockedwords customcss">
+            <button class="blockedword button" onclick="blockWordSel()">Blacklist Word</button>
             </div>
             <h3>About</h3>
             <div class="stg-section">
-            <span>leo v1.20</span>
+            <span>meo v1.2.0</span>
+            </div>
+            <h3>Credits</h3>
+            <div class="stg-section">
+                <div class="list">
+                    <span class="credit">Tnix</span>
+                    <span class="credit">melt, for the original webhook code</span>
+                    <span class="credit">theotherhades</span>
+                    <span class="credit">You, ${localStorage.getItem("uname")}, for using the client</span>
+                    <span class="credit">All the contributors</span>
+                </div>
             </div>
             </div>
             `;
 
-    pageContainer.innerHTML = settingsContent;
+            pageContainer.innerHTML = settingsContent;
 
-    const chbxs = document.querySelectorAll("input[type='checkbox']");
-    const homepagecheckbox = document.getElementById("homepage");
-    const consolewarningscheckbox = document.getElementById("consolewarnings");
+            const settings = {
+                swearfilter: document.getElementById("swearfilter"),
+                homepage: document.getElementById("homepage"),
+                consolewarnings: document.getElementById("consolewarnings"),
+                blockedmessages: document.getElementById("blockedmessages"),
+                invtyping: document.getElementById("invtyping"),
+                imagewhitelist: document.getElementById("imagewhitelist"),
+                censorwords: document.getElementById("censorwords"),
+                embeds: document.getElementById("embeds"),
+                reducemotion: document.getElementById("reducemotion"),
+                underlinelinks: document.getElementById("underlinelinks")
+            };
+        
+            Object.values(settings).forEach((checkbox) => {
+                checkbox.addEventListener("change", () => {
+                    localStorage.setItem('settings', JSON.stringify({
+                        swearfilter: settings.swearfilter.checked,
+                        homepage: settings.homepage.checked,
+                        consolewarnings: settings.consolewarnings.checked,
+                        blockedmessages: settings.blockedmessages.checked,
+                        invtyping: settings.invtyping.checked,
+                        imagewhitelist: settings.imagewhitelist.checked,
+                        censorwords: settings.censorwords.checked,
+                        embeds: settings.embeds.checked,
+                        reducemotion: settings.reducemotion.checked,
+                        underlinelinks: settings.underlinelinks.checked
+                    }));
+                    setAccessibilitySettings();
+                });
+            });
+        
+            const storedSettings = JSON.parse(localStorage.getItem('settings')) || {};
+            Object.entries(storedSettings).forEach(([setting, value]) => {
+                if (settings[setting]) {
+                    settings[setting].checked = value;
+                }
+            });
 
-    chbxs.forEach(function (checkbox) {
-        checkbox.addEventListener("change", function () {
-            if (homepagecheckbox && consolewarningscheckbox) {
-                localStorage.setItem('settings', JSON.stringify({ homepage: homepagecheckbox.checked, consolewarnings: consolewarningscheckbox.checked }));
+        const cont = document.querySelector('.blockedusers');
+
+        for (var user in blockedUsers) {
+            if (blockedUsers.hasOwnProperty(user)) {
+                const item = document.createElement('button');
+                
+                item.innerText = '@' + user;
+                
+                item.classList.add('blockeduser');
+                item.classList.add('button');
+                
+                item.setAttribute("onclick", `blockUserModal('${user}')`);
+                
+                cont.appendChild(item);
             }
-        });
-    });
+        }
 
-    const storedsettings = JSON.parse(localStorage.getItem('settings')) || {};
-    const homepagesetting = storedsettings.homepage || false;
-    const consolewarningssetting = storedsettings.consolewarnings || false;
+        const bwcont = document.querySelector('.blockedwords');
 
-    if(homepagecheckbox) homepagecheckbox.checked = homepagesetting;
-    if(consolewarningscheckbox) consolewarningscheckbox.checked = consolewarningssetting;
+        for (const word in blockedWords) {
+            if (blockedWords.hasOwnProperty(word)) {
+                const item = document.createElement('button');
+                
+                item.innerText = word;
+                
+                item.classList.add('blockedword');
+                item.classList.add('button');
+                
+                item.setAttribute("onclick", `unblockWord('${word}')`);
+                
+                bwcont.appendChild(item);
+            }
+        }
+
 }
 
 async function loadplugins() {
     let pageContainer = document.getElementById("main");
     let settingsContent = `
         <div class="settings">
-            <h1>Plugins (Beta)</h1>
-            <h3>May require a refresh upon enabling/disabling</h3>
+            <h1>Plugins</h1>
             <div class="msgs"></div>
             <div class='plugins'>
     `;
@@ -1328,9 +1409,9 @@ async function loadplugins() {
         const isEnabled = localStorage.getItem(plugin.name) === 'true';
 
         settingsContent += `
-            <div class='plugin'>
+            <div class='section plugin'>
                 <h3>${plugin.name}</h3>
-                <i class='desc'>Created by <a href='https://github.com/${plugin.creator}'>${plugin.creator}</a> | Installs from ${plugin.source}</i>
+                <i class='desc'>Created by <a href='https://github.com/${plugin.creator}'>${plugin.creator}</a></i>
                 <p class='desc'>${plugin.description}</p>
                 <label>
                     enable
@@ -1342,11 +1423,11 @@ async function loadplugins() {
 
     settingsContent += `
         </div>
-            <h1>Custom Plugin</h1>
-            <h3>Caution: can be very dangerous</h3>
-            <div class='customplugin'>
-                <textarea class="editor" id='customplugininput' placeholder="// create plugin here"></textarea>
-                <input class='cstpgbt' type='button' value='Run' onclick="customplugin()">
+            <h3>Custom Plugin</h3>
+            <p>Caution: can be very dangerous</p>
+            <div class='customcss'>
+                <textarea class="editor" id='customplugininput' placeholder="// you put stuff here"></textarea>
+                <button class='cstpgbt button' onclick="customplugin()">Run</button>
             </div>
         </div>
     `;
@@ -1354,7 +1435,7 @@ async function loadplugins() {
 
     pluginsdata.forEach(plugin => {
         const checkbox = document.getElementById(plugin.name);
-        checkbox.addEventListener('change', function () {
+        checkbox.addEventListener('change', function() {
             if (checkbox.checked) {
                 localStorage.setItem(plugin.name, 'true');
                 loadpluginscript(plugin.script);
@@ -1365,7 +1446,6 @@ async function loadplugins() {
     });
 }
 
-
 function loadpluginscript(scriptUrl) {
     const script = document.createElement('script');
     script.src = scriptUrl;
@@ -1375,9 +1455,9 @@ function loadpluginscript(scriptUrl) {
 
 async function fetchplugins() {
     try {
-        // remember to bring this back when final
-        //    const response = await fetch('./plugins.json');
-        const response = await fetch('plugins.json');
+    // remember to bring this back when final
+    //    const response = await fetch('./plugins.json');
+        const response = await fetch('https://meo-32r.pages.dev/plugins.json');
         const pluginsdata = await response.json();
         return pluginsdata;
     } catch (error) {
@@ -1386,7 +1466,7 @@ async function fetchplugins() {
     }
 }
 
-async function loadsavedplugins() {
+async function loadSavedPlugins() {
     const pluginsdata = await fetchplugins();
     pluginsdata.forEach(plugin => {
         const isEnabled = localStorage.getItem(plugin.name) === 'true';
@@ -1510,7 +1590,8 @@ function loadappearance() {
                 </div>
             <h3>Special Themes</h3>
                 <div class="theme-buttons-inner">
-                    <button onclick='changetheme(\"cosmic\", this)' class='theme-button cosmic-theme'>Cosmic Latte</button>
+                <button onclick='changetheme(\"cosmic\", this)' class='theme-button cosmic-theme'>Cosmic Latte</button>
+                <button onclick='changetheme(\"lime\", this)' class='theme-button lime-theme'>Lime</button>
                     <button onclick='changetheme(\"bsky\", this)' class='theme-button bsky-theme'>Midnight</button>
                     <button onclick='changetheme(\"oled\", this)' class='theme-button oled-theme'>Black</button>
                     <button onclick='changetheme(\"roarer\", this)' class='theme-button roarer-theme'>Roarer</button>
@@ -1518,6 +1599,7 @@ function loadappearance() {
                     <button onclick='changetheme(\"blurple\", this)' class='theme-button blurple-theme'>Blurple</button>
                     <button onclick='changetheme(\"grain\", this)' class='theme-button grain-theme'>Grain</button>
                     <button onclick='changetheme(\"grip\", this)' class='theme-button grip-theme'>9rip</button>
+                    <button onclick='changetheme(\"sage\", this)' class='theme-button sage-theme'>Sage</button>
                 </div>
             <h3>Accessible Themes</h3>
                 <div class="theme-buttons-inner">
@@ -1540,79 +1622,84 @@ function loadappearance() {
                 </div>
             </div>
             <br>
-            <div class="custom-theme-in section">
-                <div class="cstmeinp">
-                <label for="primary">Primary Color:</label>
-                <input type="color" id="primary" name="primary" value="#15a4c1">
-                </div>    
-                <div class="cstmeinp">
-                <label for="primary">Secondary Color:</label>
-                <input type="color" id="secondary" name="secondary" value="#0f788e">
+            <div class="customcss">
+                <div class="custom-theme-in section">
+                    <div class="cstmeinp">
+                    <label for="primary" class="custom-label">Primary Color:</label>
+                    <input type="color" class="cstcolinpc" id="primary" name="primary" value="#15a4c1">
+                    </div>    
+                    <div class="cstmeinp">
+                    <label for="secondary" class="custom-label">Secondary Color:</label>
+                    <input type="color" class="cstcolinpc" id="secondary" name="secondary" value="#0f788e">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="background" class="custom-label">Background Color:</label>
+                    <input type="color" class="cstcolinpc" id="background" name="background" value="#1c1f26">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="color" class="custom-label">Text Color:</label>
+                    <input type="color" class="cstcolinpc" id="color" name="color" value="#fefefe">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="accent-color" class="custom-label">Accent Color:</label>
+                    <input type="color" class="cstcolinpc" id="accent-color" name="accent-color" value="#2f3540">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="hov-accent-color" class="custom-label">Accent Hover Color:</label>
+                    <input type="color" class="cstcolinpc" id="hov-accent-color" name="hov-accent-color" value="#414959">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="hov-color" class="custom-label">Secondary Hover Color:</label>
+                    <input type="color" class="cstcolinpc" id="hov-color" name="hov-color" value="#353b49">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="link-color" class="custom-label">Link Color:</label>
+                    <input type="color" class="cstcolinpc" id="link-color" name="link-color" value="#00abd2">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="attachment-background-color" class="custom-label">Attachment Background Color:</label>
+                    <input type="color" class="cstcolinpc" id="attachment-background-color" name="attachment-background-color" value="#094c5b">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="attachment-color" class="custom-label">Attachment Text Color:</label>
+                    <input type="color" class="cstcolinpc" id="attachment-color" name="attachment-color" value="#15a4c1">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="attachment-background-color-hover" class="custom-label">Attachment Hover Background Color:</label>
+                    <input type="color" class="cstcolinpc" id="attachment-background-color-hover" name="attachment-background-color-hover" value="#15a4c1">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="attachment-color-hover" class="custom-label">Attachment Hover Text Color:</label>
+                    <input type="color" class="cstcolinpc" id="attachment-color-hover" name="attachment-color-hover" value="#fefefe">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="button-color" class="custom-label">Post Button Color:</label>
+                    <input type="color" class="cstcolinpc" id="button-color" name="button-color" value="#a5abb3">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="hov-button-color" class="custom-label">Post Button Hover Color:</label>
+                    <input type="color" class="cstcolinpc" id="hov-button-color" name="hov-button-color" value="#fefefe">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="modal-color" class="custom-label">Modal Background Color:</label>
+                    <input type="color" class="cstcolinpc" id="modal-color" name="modal-color" value="#2f3540">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="modal-button-color" class="custom-label">Modal Button Color:</label>
+                    <input type="color" class="cstcolinpc" id="modal-button-color" name="modal-button-color" value="#414959">
+                    </div>
+                    <div class="cstmeinp">
+                    <label for="hov-modal-button-color" class="custom-label">Modal Button Hover Color:</label>
+                    <input type="color" class="cstcolinpc" id="hov-modal-button-color" name="hov-modal-button-color" value="#4d576a">
+                    </div>
                 </div>
-                <div class="cstmeinp">
-                <label for="primary">Background Color:</label>
-                <input type="color" id="background" name="background" value="#1c1f26">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Text Color:</label>
-                <input type="color" id="color" name="color" value="#fefefe">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Accent Color:</label>
-                <input type="color" id="accent-color" name="accent-color" value="#2f3540">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Accent Hover Color:</label>
-                <input type="color" id="hov-accent-color" name="hov-accent-color" value="#414959">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Secondary Hover Color:</label>
-                <input type="color" id="hov-color" name="hov-color" value="#353b49">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Link Color:</label>
-                <input type="color" id="link-color" name="link-color" value="#00abd2">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Attachment Background Color:</label>
-                <input type="color" id="attachment-background-color" name="attachment-background-color" value="#094c5b">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Attachment Text Color:</label>
-                <input type="color" id="attachment-color" name="attachment-color" value="#15a4c1">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Attachment Hover Background Color:</label>
-                <input type="color" id="attachment-background-color-hover" name="attachment-background-color-hover" value="#15a4c1">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Attachment Hover Text Color:</label>
-                <input type="color" id="attachment-color-hover" name="attachment-color-hover" value="#fefefe">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Post Button Color:</label>
-                <input type="color" id="button-color" name="button-color" value="#a5abb3">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Post Button Hover Color:</label>
-                <input type="color" id="hov-button-color" name="hov-button-color" value="#fefefe">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Modal Background Color:</label>
-                <input type="color" id="modal-color" name="modal-color" value="#2f3540">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Modal Button Color:</label>
-                <input type="color" id="modal-button-color" name="modal-button-color" value="#414959">
-                </div>
-                <div class="cstmeinp">
-                <label for="primary">Modal Button Hover Color:</label>
-                <input type="color" id="hov-modal-button-color" name="hov-modal-button-color" value="#4d576a">
-                </div>
+                <button onclick="applyCustomTheme()" class="cstpgbt button">Apply</button>
+                <button onclick="saveCustomTheme()" class="cstpgbt button">Save Theme</button>
+                <button onclick="loadCustomThemeFile()" class="cstpgbt button">Load Theme</button>
+
             </div>
-            <button onclick="applycsttme()" class="cstpgbt button">Apply</button>
         <h3>Custom CSS</h3>
-        <div class='customcss'>
+        <div class='list'>
             <textarea class="editor" id='customcss' placeholder="// you put stuff here"></textarea>
         </div>
     </div>
@@ -1642,16 +1729,16 @@ function loadappearance() {
 
     cstmcsstxt.addEventListener('input', function () {
         const newCustomCSS = cstmcsstxt.value;
-
+        
         let customstyle = document.getElementById('customstyle');
         if (!customstyle) {
             customstyle = document.createElement('style');
             customstyle.id = 'customstyle';
             document.head.appendChild(customstyle);
         }
-
+        
         customstyle.textContent = newCustomCSS;
-
+        
         localStorage.setItem('customCSS', newCustomCSS);
     });
 
@@ -1660,7 +1747,7 @@ function loadappearance() {
     document.querySelector('.theme-buttons .' + localStorage.getItem('theme') + '-theme').classList.add('selected');
 }
 
-function applycsttme() {
+function applyCustomTheme() {
     const customThemeParameters = document.querySelectorAll('.custom-theme-in input[type="color"]');
     let customThemeCSS = '';
 
@@ -1670,23 +1757,100 @@ function applycsttme() {
         customThemeCSS += `--${propertyName}: ${propertyValue};`;
     });
 
-    const customThemeStyle = document.createElement('style');
+    let customThemeStyle = document.querySelector('#customtheme');
+
+    if (!customThemeStyle) {
+        customThemeStyle = document.createElement('style');
+        customThemeStyle.id = 'customtheme';
+        document.head.appendChild(customThemeStyle);
+    }
+
     customThemeStyle.textContent = `.custom-theme { ${customThemeCSS} }`;
-    document.head.appendChild(customThemeStyle);
 
     localStorage.setItem('customThemeCSS', customThemeCSS);
 }
 
-function loadcsttme() {
+function loadCustomTheme() {
     const customThemeCSS = localStorage.getItem('customThemeCSS');
     if (customThemeCSS) {
-        const customThemeStyle = document.createElement('style');
+        let customThemeStyle = document.querySelector('#customtheme');
+
+        if (!customThemeStyle) {
+            customThemeStyle = document.createElement('style');
+            customThemeStyle.id = 'customtheme';
+            document.head.appendChild(customThemeStyle);
+        }
+
         customThemeStyle.textContent = `.custom-theme { ${customThemeCSS} }`;
-        document.head.appendChild(customThemeStyle);
     }
 }
 
-function loadcstmcss() {
+function saveCustomTheme() {
+    const customThemeCSS = localStorage.getItem('customThemeCSS');
+    if (customThemeCSS) {
+        const blob = new Blob([customThemeCSS], { type: 'text/css' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'custom-theme.css';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } else {
+        console.error('No cstcss found');
+    }
+}
+
+function loadCustomThemeFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.css, .txt';
+
+    input.addEventListener('change', function() {
+        const file = this.files[0];
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const customThemeCSS = event.target.result;
+
+            applyCustomThemeFromFile(customThemeCSS);
+        };
+
+        reader.readAsText(file);
+    });
+
+    input.click();
+}
+
+function applyCustomThemeFromFile(customThemeCSS) {
+    // thanks bing ai for this bit (I WAS LAZY)
+    const cssVariables = customThemeCSS.match(/--[^;]+/g);
+
+    if (!cssVariables) {
+        console.error('No CSS variables found in the provided customThemeCSS.');
+        return;
+    }
+
+    let customThemeStyle = document.querySelector('#customtheme');
+
+    if (!customThemeStyle) {
+        customThemeStyle = document.createElement('style');
+        customThemeStyle.id = 'customtheme';
+        document.head.appendChild(customThemeStyle);
+    }
+
+    const cssRule = cssVariables.map(variable => `var(${variable})`).join(', ');
+
+    customThemeStyle.textContent = `.custom-theme { ${cssRule} }`;
+
+    localStorage.setItem('customThemeCSS', customThemeCSS);
+}
+
+
+function loadCustomCss() {
     const css = localStorage.getItem('customCSS');
 
     let customstyle = document.getElementById('customstyle');
@@ -1699,12 +1863,13 @@ function loadcstmcss() {
     customstyle.textContent = css || '';
 }
 
+
 function changetheme(theme, button) {
     const selectedTheme = theme;
-
+  
     const previousTheme = localStorage.getItem("theme");
     if (previousTheme) {
-        document.documentElement.classList.remove(previousTheme + "-theme");
+      document.documentElement.classList.remove(previousTheme + "-theme");
     }
     document.documentElement.classList.add(selectedTheme + "-theme");
     localStorage.setItem("theme", selectedTheme);
@@ -1733,7 +1898,7 @@ function settingsstuff() {
     }
 
     return JSON.parse(storedsettings);
-}
+} 
 
 function formattime(timestamp) {
     const now = new Date();
@@ -1779,13 +1944,12 @@ function launchscreen() {
     </div>`
     const orange = document.getElementById("main");
     orange.innerHTML = green;
-
-    let nv = document.getElementById("nav");
-    nv.innerHTML = ``;
-    nv = document.getElementById("groups");
-    nv.innerHTML = ``;
-    // this should be launching the launch screen not vice versa
-    meowerConnection.close();
+    if (document.getElementById("msgs"))
+    document.getElementById("msgs").innerHTML = "";
+    if (document.getElementById("nav"))
+    document.getElementById("nav").innerHTML = "";
+    if (document.getElementById("groups"))
+    document.getElementById("groups").innerHTML = "";
 }
 
 function autoresize() {
@@ -1847,13 +2011,13 @@ function cancelEdit() {
 function openImage(url) {
     const baseURL = url.split('?')[0];
     const fileName = baseURL.split('/').pop();
-
+    
     document.documentElement.style.overflow = "hidden";
     const mdlbck = document.querySelector('.image-back');
-
+    
     if (mdlbck) {
         mdlbck.style.display = 'flex';
-
+        
         const mdl = mdlbck.querySelector('.image-mdl');
         if (mdl) {
             mdl.innerHTML = `
@@ -1864,7 +2028,7 @@ function openImage(url) {
             </div>
             `;
         }
-    }
+    }  
 }
 
 function preventClose(event) {
@@ -1873,15 +2037,15 @@ function preventClose(event) {
 
 function closeImage() {
     document.documentElement.style.overflow = "";
-
+    
     const mdlbck = document.querySelector('.image-back');
-
+    
     if (mdlbck) {
         mdlbck.style.display = 'none';
     }
-
+    
     const mdl = document.querySelector('.image-mdl');
-
+    
     if (mdlbck) {
         mdl.style.background = '';
         mdl.classList.remove('custom-bg');
@@ -1906,27 +2070,27 @@ function createChat() {
         },
         body: JSON.stringify({ nickname })
     })
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-        })
-        .then(data => {
-            chatCache[data._id] = data;
-            loadchat(data._id);
-            closemodal();
-        })
-        .catch(e => {
-            openUpdate(`Failed to create chat: ${e}`);
-        });
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        chatCache[data._id] = data;
+        loadchat(data._id);
+        closemodal();
+    })
+    .catch(e => {
+        openUpdate(`Failed to create chat: ${e}`);
+    });
 }
 
 function openModal(postId) {
     document.documentElement.style.overflow = "hidden";
     const mdlbck = document.querySelector('.modal-back');
-
+    
     if (mdlbck) {
         mdlbck.style.display = 'flex';
-
+        
         const mdl = mdlbck.querySelector('.modal');
         if (mdl) {
             mdl.id = postId;
@@ -1952,13 +2116,13 @@ function openModal(postId) {
                     mdlt.innerHTML += `
                     <button class="modal-button" onclick="deletePost('${postId}')"><div>Delete</div><div class="modal-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15 3.999V2H9V3.999H3V5.999H21V3.999H15Z"></path><path fill="currentColor" d="M5 6.99902V18.999C5 20.101 5.897 20.999 7 20.999H17C18.103 20.999 19 20.101 19 18.999V6.99902H5ZM11 17H9V11H11V17ZM15 17H13V11H15V17Z"></path></svg></div></button>      
                     <button class="modal-button" onclick="editPost('${page}', '${postId}')"><div>Edit</div><div class="modal-icon"><svg width="20" height="20" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.2929 9.8299L19.9409 9.18278C21.353 7.77064 21.353 5.47197 19.9409 4.05892C18.5287 2.64678 16.2292 2.64678 14.817 4.05892L14.1699 4.70694L19.2929 9.8299ZM12.8962 5.97688L5.18469 13.6906L10.3085 18.813L18.0201 11.0992L12.8962 5.97688ZM4.11851 20.9704L8.75906 19.8112L4.18692 15.239L3.02678 19.8796C2.95028 20.1856 3.04028 20.5105 3.26349 20.7337C3.48669 20.9569 3.8116 21.046 4.11851 20.9704Z" fill="currentColor"></path></svg></div></button>      
-                    `;
+                    `; 
                 }
 
                 if (localStorage.getItem("permissions") === "1") {
                     mdlt.innerHTML += `
                     <button class="modal-button" onclick="modPostModal('${postId}')"><div>Moderate</div><div class="modal-icon"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.00001C15.56 6.00001 12.826 2.43501 12.799 2.39801C12.421 1.89801 11.579 1.89801 11.201 2.39801C11.174 2.43501 8.44 6.00001 5 6.00001C4.447 6.00001 4 6.44801 4 7.00001V14C4 17.807 10.764 21.478 11.534 21.884C11.68 21.961 11.84 21.998 12 21.998C12.16 21.998 12.32 21.96 12.466 21.884C13.236 21.478 20 17.807 20 14V7.00001C20 6.44801 19.553 6.00001 19 6.00001ZM15 16L12 14L9 16L10 13L8 11H11L12 8.00001L13 11H16L14 13L15 16Z"></path></svg></div></button>      
-                    `;
+                    `; 
                 }
             }
             mdbt = mdl.querySelector('.modal-bottom');
@@ -1966,12 +2130,12 @@ function openModal(postId) {
                 mdbt.innerHTML = ``;
             }
         }
-    }
+    }  
 }
 
 function openUsrModal(uId) {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
 
     if (mdlbck) {
@@ -1983,19 +2147,19 @@ function openUsrModal(uId) {
                 mdlt.innerHTML = `
                 <iframe class="profile" src="users.html?u=${uId}"></iframe>
                 `;
-
+                
                 fetch(`https://api.meower.org/users/${uId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.avatar_color !== "!color") {
-                            const clr1 = darkenColour(data.avatar_color, 3);
-                            const clr2 = darkenColour(data.avatar_color, 5);
-                            mdl.style.background = `linear-gradient(180deg, ${clr1} 0%, ${clr2} 100%`;
-                            mdl.classList.add('custom-bg');
-                        }
-                    })
-                    .catch(error => console.error('Error fetching user profile:', error));
-            }
+                .then(response => response.json())
+                .then(data => {
+                    if (data.avatar_color !== "!color") {
+                        const clr1 = darkenColour(data.avatar_color, 3);
+                        const clr2 = darkenColour(data.avatar_color, 5);
+                        mdl.style.background = `linear-gradient(180deg, ${clr1} 0%, ${clr2} 100%`;
+                        mdl.classList.add('custom-bg');
+                    }
+                })
+                .catch(error => console.error('Error fetching user profile:', error));
+                }
         }
         const mdbt = mdl.querySelector('.modal-bottom');
         if (mdbt) {
@@ -2006,7 +2170,7 @@ function openUsrModal(uId) {
 
 function reportModal(id) {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
 
     if (mdlbck) {
@@ -2044,59 +2208,6 @@ function reportModal(id) {
     }
 }
 
-function errorModal(header, text) {
-    document.documentElement.style.overflow = "hidden";
-
-    const mdlbck = document.querySelector('.modal-back');
-    const mdl = mdlbck?.querySelector('.modal');
-    const mdlt = mdl?.querySelector('.modal-top');
-    const mdbt = mdl?.querySelector('.modal-bottom');
-
-    if (mdlbck) mdlbck.style.display = 'flex';
-    if (mdlt) mdlt.innerHTML = `<h3>${header}</h3><hr class="mdl-hr"><span class="subheader">${text}</span>`;
-    if (mdbt) mdbt.innerHTML = ``;
-}
-
-function uploadModal() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = ".jpg,.jpeg,.png,.bmp,.gif,.tif,.webp,.heic,.avif";
-    input.multiple = true;
-    input.click();
-
-    input.onchange = function(e) {
-        const files = Array.from(e.target.files);
-        if (files.some(file => file.size > 32 * 1024 * 1024)) {
-            errorModal("File too large", "Please upload files smaller than 32MB.");
-            return;
-        }
-
-        const textarea = document.querySelector('.message-input.text');
-        textarea.placeholder = `Uploading ${files.length} ${files.length > 1 ? 'images' : 'image'}...`;
-
-        const uploads = files.map(file => {
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('username', leo.meower.getusername());
-
-            return fetch('https://leoimages.atticat.tech/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => data.image_url) // Just return the URL
-            .catch(error => errorModal("Error uploading image", error));
-        });
-
-        Promise.all(uploads).then(imageUrls => {
-            // Add all the URLs to the textarea
-            textarea.value += imageUrls.join('\n') + '\n';
-            autoresize();
-            textarea.placeholder = "What's on your mind?"; // Reset placeholder
-        });
-    };
-}
-
 function sendReport(id) {
     const data = {
         cmd: "direct",
@@ -2117,21 +2228,21 @@ function sendReport(id) {
 
 async function closemodal(message) {
     document.documentElement.style.overflow = "";
-
+    
     const mdlbck = document.querySelector('.modal-back');
-
+    
     if (mdlbck) {
         mdlbck.style.display = 'none';
     }
-
+    
     const mdl = document.querySelector('.modal');
-
+    
     if (mdlbck) {
         mdl.id = '';
         mdl.style.background = '';
         mdl.classList.remove('custom-bg');
     }
-
+    
     if (message) {
         const delay = ms => new Promise(res => setTimeout(res, ms));
         await delay(100);
@@ -2141,7 +2252,7 @@ async function closemodal(message) {
 
 function openModModal() {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
 
     if (mdlbck) {
@@ -2190,16 +2301,16 @@ async function loadreports() {
             "token": localStorage.getItem("token")
         }
     })
-        .then(response => response.json())
-        .then(data => {
-            const reports = data.autoget;
-            const modreports = document.querySelector('.modal-top');
-
-            reports.forEach(report => {
-                if (report.type === 'post') {
-                    const rprtbx = document.createElement('div');
-                    rprtbx.classList.add('report-box');
-                    rprtbx.innerHTML = `
+    .then(response => response.json())
+    .then(data => {
+        const reports = data.autoget;
+        const modreports = document.querySelector('.modal-top');
+        
+        reports.forEach(report => {
+            if (report.type === 'post') {
+                const rprtbx = document.createElement('div');
+                rprtbx.classList.add('report-box');
+                rprtbx.innerHTML = `
                     <div class="buttonContainer">
                         <div class='toolbarContainer'>
                             <div class='toolButton' onclick='closeReport("${report._id}", "false")'>
@@ -2226,33 +2337,33 @@ async function loadreports() {
                         </div>
                     </div>
                 `;
-
-                    modreports.appendChild(rprtbx);
-
-                    const reportsList = rprtbx.querySelector('.reports-list');
-
-                    report.reports.forEach(item => {
-                        reportsList.innerHTML += `
+                
+                modreports.appendChild(rprtbx);
+                
+                const reportsList = rprtbx.querySelector('.reports-list');
+                
+                report.reports.forEach(item => {
+                    reportsList.innerHTML += `
                     <li>
                         <p>User: ${item.user}</p>
                         <p>Reason: ${item.reason}</p>
                         <p>Comment: ${item.comment}</p>
                     </li>
                     `;
-
-                        loadPfp(report.content.u, 1)
-                            .then(pfpElement => {
-                                if (pfpElement) {
-                                    const rpfp = rprtbx.querySelector('.avatar');
-                                    rpfp.replaceWith(pfpElement);
-                                }
-                            });
+                    
+                    loadPfp(report.content.u, 1)
+                    .then(pfpElement => {
+                        if (pfpElement) {
+                            const rpfp = rprtbx.querySelector('.avatar');
+                            rpfp.replaceWith(pfpElement);
+                        }
                     });
+                });
 
-                } else if (report.type === 'user') {
-                    const rprtbx = document.createElement('div');
-                    rprtbx.classList.add('report-box');
-                    rprtbx.innerHTML = `
+            } else if (report.type === 'user') {                
+                const rprtbx = document.createElement('div');
+                rprtbx.classList.add('report-box');
+                rprtbx.innerHTML = `
                     <div class="buttonContainer">
                         <div class='toolbarContainer'>
                             <div class='toolButton' onclick='closeReport("${report._id}", "false")'>
@@ -2278,13 +2389,13 @@ async function loadreports() {
                     </div>
                     </div>
                 `;
-
-                    modreports.appendChild(rprtbx);
-
-                    const reportsList = rprtbx.querySelector('.reports-list');
-
-                    report.reports.forEach(item => {
-                        reportsList.innerHTML += `
+                
+                modreports.appendChild(rprtbx);
+                
+                const reportsList = rprtbx.querySelector('.reports-list');
+                
+                report.reports.forEach(item => {
+                    reportsList.innerHTML += `
                     <li>
                         <p>User: ${item.user}</p>
                         <p>Reason: ${item.reason}</p>
@@ -2292,27 +2403,27 @@ async function loadreports() {
                     </li>
                     `;
 
-                        const rpfp = rprtbx.querySelector('.avatar');
-                        if (report.content.avatar) {
-                            rpfp.src = `https://uploads.meower.org/icons/${report.content.avatar}`
-                            rpfp.style = `border: 3px solid #${report.content.avatar_color};background-color:#${report.content.avatar_color};`
-                        } else {
-                            rpfp.src = `images/avatars/icon_${report.content.pfp_data - 1}.svg`
-                            rpfp.style = `border: 3px solid #${report.content.avatar_color};background-color:#fff;`
-                        }
-                    });
-                }
-            });
-        })
-        .catch(error => {
-            console.error("Error loading reports:", error);
+                    const rpfp = rprtbx.querySelector('.avatar');
+                    if (report.content.avatar) {
+                        rpfp.src = `https://uploads.meower.org/icons/${report.content.avatar}`
+                        rpfp.style = `border: 3px solid #${report.content.avatar_color};background-color:#${report.content.avatar_color};`
+                    } else {
+                        rpfp.src = `images/avatars/icon_${report.content.pfp_data - 1}.svg`
+                        rpfp.style = `border: 3px solid #${report.content.avatar_color};background-color:#fff;`
+                    }
+                });
+            }
         });
+    })
+    .catch(error => {
+        console.error("Error loading reports:", error);
+    });
 
 }
 
 function modUserModal(user) {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
 
     if (mdlbck) {
@@ -2349,10 +2460,10 @@ async function loadmoduser(user) {
             "token": localStorage.getItem("token")
         }
     })
-        .then(response => response.json())
-        .then(data => {
-            const modusr = document.querySelector('.mod-user');
-            modusr.innerHTML = `
+    .then(response => response.json())
+    .then(data => {
+        const modusr = document.querySelector('.mod-user');
+        modusr.innerHTML = `
         <span class="subheader">User Info</span>
         <div class="mod-post">
         <div class="pfp">
@@ -2389,73 +2500,73 @@ async function loadmoduser(user) {
             <button class="modal-button" onclick="sendAlert('${data._id}')">Send Alert</button>
         `;
 
-            const rpfp = document.querySelector('.mod-post .avatar');
-            if (data.avatar) {
-                rpfp.src = `https://uploads.meower.org/icons/${data.avatar}`;
-                rpfp.style.border = `3px solid #${data.avatar_color}`;
-                rpfp.style.backgroundColor = `#${data.avatar_color}`;
-            } else if (data.pfp_data) {
-                // legacy avatars
-                rpfp.src = `images/avatars/icon_${data.pfp_data - 1}.svg`;
-                rpfp.classList.add('svg-avatar');
-                rpfp.style.border = `3px solid #${data.avatar_color}`;
-                rpfp.style.backgroundColor = `#fff`;
-            } else {
-                rpfp.src = `images/avatars/icon_-4.svg`;
-                rpfp.classList.add('svg-avatar');
-                rpfp.style.border = `3px solid #fff`;
-                rpfp.style.backgroundColor = `#fff`;
-            }
+        const rpfp = document.querySelector('.mod-post .avatar');
+        if (data.avatar) {
+            rpfp.src = `https://uploads.meower.org/icons/${data.avatar}`;
+            rpfp.style.border = `3px solid #${data.avatar_color}`;
+            rpfp.style.backgroundColor = `#${data.avatar_color}`;
+        } else if (data.pfp_data) {
+            // legacy avatars
+            rpfp.src = `images/avatars/icon_${data.pfp_data - 1}.svg`;
+            rpfp.classList.add('svg-avatar');
+            rpfp.style.border = `3px solid #${data.avatar_color}`;
+            rpfp.style.backgroundColor = `#fff`;
+        } else {
+            rpfp.src = `images/avatars/icon_-4.svg`;
+            rpfp.classList.add('svg-avatar');
+            rpfp.style.border = `3px solid #fff`;
+            rpfp.style.backgroundColor = `#fff`;
+        }
 
-            const altlist = modusr.querySelector('#alts');
-            const iplist = modusr.querySelector('#ips');
+        const altlist = modusr.querySelector('#alts');
+        const iplist = modusr.querySelector('#ips');
 
-            data.alts.forEach(item => {
-                altlist.innerHTML += `
+        data.alts.forEach(item => {
+            altlist.innerHTML += `
             <li>
                 <span id="username" onclick="modUserModal('${item}')">${item}</span>
             </li>
             `;
-            });
+        });
 
-            data.recent_ips.forEach(item => {
-                iplist.innerHTML += `
+        data.recent_ips.forEach(item => {
+            iplist.innerHTML += `
             <div class="table-section">
                 <div class="mod-td" onclick="openUpdate('${item.netinfo._id}')">${item.ip}</div>
                 <div class="mod-td">${createDate(item.last_used)}</div>
                 <div class="mod-td">${item.netinfo.vpn}</div>
             </div>
             `;
-            });
-
-            fetch(`https://api.meower.org/admin/notes/${data.uuid}`, {
-                method: "GET",
-                headers: {
-                    "token": localStorage.getItem("token")
-                }
-            })
-                .then(response => response.json())
-                .then(noteData => {
-                    if (noteData && noteData.notes) {
-                        const mdpsnt = document.getElementById('mod-post-note');
-                        mdpsnt.value = noteData.notes;
-                    } else {
-                        console.log("No data received from server, the note is probably blank");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading note data:", error);
-                });
-
+        });
+    
+        fetch(`https://api.meower.org/admin/notes/${data.uuid}`, {
+            method: "GET",
+            headers: {
+                "token": localStorage.getItem("token")
+            }
+        })
+        .then(response => response.json())
+        .then(noteData => {
+            if (noteData && noteData.notes) {
+                const mdpsnt = document.getElementById('mod-post-note');
+                mdpsnt.value = noteData.notes;
+            } else {
+                console.log("No data received from server, the note is probably blank");
+            }
         })
         .catch(error => {
-            console.error("Error loading post:", error);
+            console.error("Error loading note data:", error);
         });
+    
+    })
+    .catch(error => {
+        console.error("Error loading post:", error);
+    });
 }
 
 function modPostModal(postid) {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
 
     if (mdlbck) {
@@ -2495,16 +2606,16 @@ async function loadmodpost(postid) {
             "token": localStorage.getItem("token")
         }
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data) {
-                fetch(`https://api.meower.org/users/${data.u}`)
-                    .then(response => response.json())
-                    .then(userData => {
-                        if (userData) {
-                            if (data.unfiltered_p) {
-                                const modpst = document.querySelector('.mod-posts');
-                                modpst.innerHTML = `
+    .then(response => response.json())
+    .then(data => {
+        if (data) {
+            fetch(`https://api.meower.org/users/${data.u}`)
+                .then(response => response.json())
+                .then(userData => {
+                    if (userData) {
+                        if (data.unfiltered_p) {
+                            const modpst = document.querySelector('.mod-posts');
+                            modpst.innerHTML = `
                                 <div class="mod-post">
                                     <div class="pfp">
                                         <img src="" alt="Avatar" class="avatar" style="" onclick="modUserModal('${data.u}')">
@@ -2520,9 +2631,9 @@ async function loadmodpost(postid) {
                                     </div>
                                 </div>
                             `;
-                            } else {
-                                const modpst = document.querySelector('.mod-posts');
-                                modpst.innerHTML = `
+                        } else {
+                            const modpst = document.querySelector('.mod-posts');
+                            modpst.innerHTML = `
                                 <div class="mod-post">
                                     <div class="pfp">
                                         <img src="" alt="Avatar" class="avatar" style="" onclick="modUserModal('${data.u}')">
@@ -2538,51 +2649,51 @@ async function loadmodpost(postid) {
                                     </div>
                                 </div>
                             `;
-                            }
-                            const rpfp = document.querySelector('.mod-posts .avatar');
-                            if (userData.avatar) {
-                                rpfp.src = `https://uploads.meower.org/icons/${userData.avatar}`;
-                                rpfp.style.border = `3px solid #${userData.avatar_color}`;
-                                rpfp.style.backgroundColor = `#${userData.avatar_color}`;
-                            } else {
-                                // legacy avatars
-                                rpfp.src = `images/avatars/icon_${userData.pfp_data - 1}.svg`;
-                                rpfp.classList.add('svg-avatar');
-                            }
-
-                            fetch(`https://api.meower.org/admin/notes/${postid}`, {
-                                method: "GET",
-                                headers: {
-                                    "token": localStorage.getItem("token")
-                                }
-                            })
-                                .then(response => response.json())
-                                .then(noteData => {
-                                    if (noteData && noteData.notes) {
-                                        const mdpsnt = document.getElementById('mod-post-note');
-                                        mdpsnt.value = noteData.notes;
-                                    } else {
-                                        console.log("No data received from server, the note is probably blank");
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Error loading note data:", error);
-                                });
-
-                        } else {
-                            console.error("Error: No user data received from server.");
                         }
-                    })
-                    .catch(error => {
-                        console.error("Error loading user data:", error);
-                    });
-            } else {
-                console.error("Error: No data received from server.");
-            }
-        })
-        .catch(error => {
-            console.error("Error loading post:", error);
-        });
+                        const rpfp = document.querySelector('.mod-posts .avatar');
+                        if (userData.avatar) {
+                            rpfp.src = `https://uploads.meower.org/icons/${userData.avatar}`;
+                            rpfp.style.border = `3px solid #${userData.avatar_color}`;
+                            rpfp.style.backgroundColor = `#${userData.avatar_color}`;
+                        } else {
+                            // legacy avatars
+                            rpfp.src = `images/avatars/icon_${userData.pfp_data - 1}.svg`;
+                            rpfp.classList.add('svg-avatar');
+                        }
+
+                        fetch(`https://api.meower.org/admin/notes/${postid}`, {
+                            method: "GET",
+                            headers: {
+                                "token": localStorage.getItem("token")
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(noteData => {
+                            if (noteData && noteData.notes) {
+                                const mdpsnt = document.getElementById('mod-post-note');
+                                mdpsnt.value = noteData.notes;
+                            } else {
+                                console.log("No data received from server, the note is probably blank");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error loading note data:", error);
+                        });
+                        
+                    } else {
+                        console.error("Error: No user data received from server.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading user data:", error);
+                });
+        } else {
+            console.error("Error: No data received from server.");
+        }
+    })
+    .catch(error => {
+        console.error("Error loading post:", error);
+    });
 }
 
 async function modDeletePost(postid) {
@@ -2606,7 +2717,7 @@ async function modDeletePost(postid) {
 
 function updateNote(postid) {
     const note = document.getElementById('mod-post-note').value;
-
+    
     fetch(`https://api.meower.org/admin/notes/${postid}`, {
         method: "PUT",
         headers: {
@@ -2617,18 +2728,18 @@ function updateNote(postid) {
             notes: note
         })
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Note updated successfully:", data);
-        })
-        .catch(error => {
-            console.error("Error updating note:", error);
-        });
+    .then(response => response.json())
+    .then(data => {
+        console.log("Note updated successfully:", data);
+    })
+    .catch(error => {
+        console.error("Error updating note:", error);
+    });
 }
 
 function sendAlert(userid) {
     const note = document.getElementById('mod-user-alert').value;
-
+    
     fetch(`https://api.meower.org/admin/users/${userid}/alert`, {
         method: "POST",
         headers: {
@@ -2639,13 +2750,13 @@ function sendAlert(userid) {
             content: note
         })
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Alerted successfully:", data);
-        })
-        .catch(error => {
-            console.error("Error sending alert:", error);
-        });
+    .then(response => response.json())
+    .then(data => {
+        console.log("Alerted successfully:", data);
+    })
+    .catch(error => {
+        console.error("Error sending alert:", error);
+    });
 }
 
 function closeReport(postid, action) {
@@ -2660,13 +2771,13 @@ function closeReport(postid, action) {
                 status: "action_taken"
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Report updated successfully:", data);
-            })
-            .catch(error => {
-                console.error("Error updating report:", error);
-            });
+        .then(response => response.json())
+        .then(data => {
+            console.log("Report updated successfully:", data);
+        })
+        .catch(error => {
+            console.error("Error updating report:", error);
+        });
     } else {
         fetch(`https://api.meower.org/admin/reports/${postid}`, {
             method: "PATCH",
@@ -2678,23 +2789,23 @@ function closeReport(postid, action) {
                 status: "no_action_taken"
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Report updated successfully:", data);
-            })
-            .catch(error => {
-                console.error("Error updating report:", error);
-            });
+        .then(response => response.json())
+        .then(data => {
+            console.log("Report updated successfully:", data);
+        })
+        .catch(error => {
+            console.error("Error updating report:", error);
+        });
     }
 }
 
 function openUpdate(message) {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
     if (mdlbck) {
         mdlbck.style.display = 'flex';
-
+        
         const mdl = mdlbck.querySelector('.modal');
         mdl.id = 'mdl-uptd';
         if (mdl) {
@@ -2714,11 +2825,11 @@ function openUpdate(message) {
 
 function createChatModal() {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
     if (mdlbck) {
         mdlbck.style.display = 'flex';
-
+        
         const mdl = mdlbck.querySelector('.modal');
         mdl.id = 'mdl-uptd';
         if (mdl) {
@@ -2739,13 +2850,99 @@ function createChatModal() {
     }
 }
 
-function imagemodal() {
+function blockWordSel() {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
     if (mdlbck) {
         mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                    mdlt.innerHTML = `
+                    <h3>Blacklist a Word</h3>
+                    <input id="block-word-input" class="mdl-inp" placeholder="Word">
+                    `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="blockWord(document.getElementById('block-word-input').value)">block</button>
+                `;
+            }
+        }
+    }
+}
 
+function blockUserSel() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                    mdlt.innerHTML = `
+                    <h3>Block a user (case sensitive)</h3>
+                    <input id="block-user-input" class="mdl-inp" placeholder="JoshAtticus">
+                    `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="blockUserModal(document.getElementById('block-user-input').value)">block</button>
+                `;
+            }
+        }
+    }
+}
+
+function blockUserModal(user) {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                if (blockedUsers.hasOwnProperty(user)) {
+                    mdlt.innerHTML = `
+                    <h3>Unblock ${user}?</h3>
+                    `;
+                } else {
+                    mdlt.innerHTML = `
+                    <h3>Block ${user}?</h3>
+                    `;
+                }
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="blockUser('${user}')">yes</button>
+                `;
+            }
+        }
+    }
+}
+
+function imagemodal() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
         const mdl = mdlbck.querySelector('.modal');
         mdl.id = 'mdl-uptd';
         if (mdl) {
@@ -2858,7 +3055,7 @@ function mdlreply(event) {
         document.getElementById('msg').focus();
         autoresize();
     }
-
+    
     closemodal();
 }
 
@@ -2898,19 +3095,21 @@ function loadexplore() {
     </div>
     </div>
     `;
+    
+    sidebars();
 
     loadstats();
 
 }
 
 function gotousr() {
-    event.preventDefault();
+    event.preventDefault(); 
     openUsrModal(document.getElementById("usrinp").value);
     document.getElementById("usrinp").blur();
 }
 
 function modgotousr() {
-    event.preventDefault();
+    event.preventDefault(); 
     modUserModal(document.getElementById("usrinpmd").value);
 }
 
@@ -2988,16 +3187,16 @@ function createDate(tsmp) {
 }
 
 function uploadImage() {
-    uploadModal()
+    openUpdate("Placeholder!");
 }
 
 function goAnywhere() {
     document.documentElement.style.overflow = "hidden";
-
+    
     const mdlbck = document.querySelector('.modal-back');
     if (mdlbck) {
         mdlbck.style.display = 'flex';
-
+        
         const mdl = mdlbck.querySelector('.modal');
         mdl.id = 'mdl-qkshr';
         if (mdl) {
@@ -3030,7 +3229,7 @@ function goAnywhere() {
 
 function goTo() {
     event.preventDefault();
-    const place = document.getElementById("goanywhere").value;
+    const place = document.getElementById("goanywhere").value.toLowerCase();
     closemodal();
     if (place.charAt(0) === "#") {
         const nickname = place.substring(1);
@@ -3067,18 +3266,18 @@ function goTo() {
 
 function searchChats(nickname) {
     for (const chatId in chatCache) {
-        if (chatCache.hasOwnProperty(chatId)) {
-            const chat = chatCache[chatId];
-            if (chat.nickname) {
-                if (chat.nickname.toLowerCase() === nickname.toLowerCase()) {
-                    return chat._id;
-                }
-            }
+      if (chatCache.hasOwnProperty(chatId)) {
+        const chat = chatCache[chatId];
+        if (chat.nickname) {
+          if (chat.nickname.toLowerCase() === nickname.toLowerCase()) {
+            return chat._id;
+          }
         }
+      }
     }
     return null;
-}
-
+  }
+  
 
 function populateSearch() {
     const query = document.getElementById("goanywhere").value.toLowerCase();
@@ -3087,24 +3286,24 @@ function populateSearch() {
         searchPopulation.innerHTML = '';
         const usernames = Object.keys(pfpCache).filter(username => username.toLowerCase().includes(query));
         const groupChats = Object.values(chatCache).filter(chat => chat.nickname && chat.nickname.toLowerCase().includes(query));
-        usernames.forEach(username => {
+        usernames.forEach(username => {        
             const item = document.createElement('div');
             item.innerText = '@' + username
             item.classList.add('searchitem');
             item.id = 'srchuser';
-            item.onclick = function () {
+            item.onclick = function() {
                 opendm(username);
                 closemodal();
             };
             searchPopulation.appendChild(item);
         });
-
-        groupChats.forEach(chat => {
+        
+        groupChats.forEach(chat => {        
             const item = document.createElement('div');
             item.innerText = chat.nickname
             item.classList.add('searchitem');
             item.id = 'srchchat';
-            item.onclick = function () {
+            item.onclick = function() {
                 loadchat(chat._id);
                 closemodal();
             };
@@ -3116,6 +3315,230 @@ function populateSearch() {
         <div class="searchitem">Use <span id="scil" title="Profile"> !</span><span id="scil" title="DM"> @</span><span id="scil" title="Chat"> #</span> for something specific.</div>
         `;
     }
+}
+
+function blockWord(word) {
+    blockedWords[word] = true;
+    localStorage.setItem("blockedWords", JSON.stringify(blockedWords));
+    if (page === 'settings') {
+        loadstgs();
+    }
+    closemodal();
+}
+
+function unblockWord(word) {
+    delete blockedWords[word];
+    localStorage.setItem("blockedWords", JSON.stringify(blockedWords));
+    if (page === 'settings') {
+        loadstgs();
+    }
+    closemodal();
+}
+
+function blockUser(user) {
+    let toggle;
+    if (blockedUsers.hasOwnProperty(user)) {
+        toggle = 0;
+        delete blockedUsers[user];
+    } else {
+        toggle = 2;
+        blockedUsers[user] = true;
+    }
+    
+    fetch(`https://api.meower.org/users/${user}/relationship`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "token": localStorage.getItem("token")
+        },
+        body: JSON.stringify({
+            state: toggle
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("sent", data);
+    })
+    .catch(error => {
+        console.error("error:", error);
+    });
+    if (page = 'settings') {
+        loadstgs();
+    }
+    closemodal();
+}
+
+function deleteTokensModal() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                <h3>Clear Tokens?</h3>
+                <hr class="mdl-hr">
+                <span class="subheader">This will log you out everywhere.</span>
+                `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="deleteTokens()">clear tokens</button>
+                `;
+            }
+        }
+    }
+}
+
+function changePasswordModal() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                <h3>Change Password</h3>
+                <input id="oldpass-input" class="mdl-inp" placeholder="Old Password" type="password">
+                <input id="newpass-input" class="mdl-inp" placeholder="New Password" type="password" minlength="8">
+                `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="changePassword()" id="changepw">change password</button>
+                `;
+            }
+        }
+    }
+}
+
+function clearLocalstorageModal() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                <h3>Clear Localstorage?</h3>
+                <hr class="mdl-hr">
+                <span class="subheader">This will log you out.</span>
+                `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                <button class="modal-back-btn" onclick="clearLocalstorage()" id="clearls">clear</button>
+                `;
+            }
+        }
+    }
+}
+
+function shareModal() {
+    document.documentElement.style.overflow = "hidden";
+    
+    const mdlbck = document.querySelector('.modal-back');
+
+    if (mdlbck) {
+        mdlbck.style.display = 'flex';
+        const mdl = mdlbck.querySelector('.modal');
+        mdl.id = 'mdl-uptd';
+        if (mdl) {
+            const mdlt = mdl.querySelector('.modal-top');
+            if (mdlt) {
+                mdlt.innerHTML = `
+                <h3>Share</h3>
+                <input id="share" class="mdl-inp" type="text" value="https://meo-32r.pages.dev/" readonly>
+                <input id="share" class="mdl-inp" type="text" value="https://eris.pages.dev/meo-experimental/" readonly>
+                `;
+            }
+            const mdbt = mdl.querySelector('.modal-bottom');
+            if (mdbt) {
+                mdbt.innerHTML = `
+                `;
+            }
+        }
+    }
+}
+
+function changePassword() {
+    const data = {
+        cmd: "change_pswd",
+        val: {
+            old: document.getElementById("oldpass-input").value,
+            new: document.getElementById("newpass-input").value
+        },
+        listener: "chpw"
+    };
+    meowerConnection.send(JSON.stringify(data));
+    document.getElementById("changepw").disabled = true;
+}
+
+function deleteTokens() {
+    closemodal();
+    launchscreen();
+    const data = {
+        cmd: "direct",
+        val: {
+            cmd: "del_tokens",
+            val: ""
+        }
+    };
+    meowerConnection.send(JSON.stringify(data));
+    logout(true);
+    closemodal("Tokens deleted, you will need to log back in");
+}
+
+function deleteAccount() {
+    const data = {
+        cmd: "direct",
+        val: {
+            cmd: "del_account",
+            val: "" //blank for now dont want my account deleted, this is usually password
+        }
+    };
+    meowerConnection.send(JSON.stringify(data));
+    closemodal("Account scheduled for deletion");
+}
+
+function clearLocalstorage() {
+    localStorage.clear();
+    logout(true);
+    closemodal('Cleared!');
+}
+
+function setAccessibilitySettings() {
+// reduce motion
+const b = document.querySelector('.modal');
+const c = document.querySelector('.image-mdl');
+if (settingsstuff().reducemotion) {
+    b.classList.add("reduced-ani");
+    c.classList.add("reduced-ani");
+} else {
+    b.classList.remove("reduced-ani");
+    c.classList.remove("reduced-ani");
+}
 }
 
 main();

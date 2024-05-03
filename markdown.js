@@ -171,7 +171,7 @@ function embed(links) {
                 embeddedElement.setAttribute("alt", fileName);
                 embeddedElement.classList.add("embed");
             }
-
+            if (settingsstuff().embeds) {
             const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
             const youtubeMobRegex = /^(https?:\/\/)?(www\.)?(m\.youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
             if (youtubeRegex.test(link) || youtubeMobRegex.test(link)) {
@@ -232,6 +232,7 @@ function embed(links) {
                     embeddedElement.appendChild(scriptTag);
                 }
             }
+        }
 
             if (embeddedElement) {
                 embeddedElements.push(embeddedElement);

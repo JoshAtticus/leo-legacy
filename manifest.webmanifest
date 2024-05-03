@@ -1,16 +1,16 @@
 {
-  "name": "Leo for Meower",
-  "short_name": "leo",
-  "start_url": "/",
+  "name": "meo ex",
+  "short_name": "meo",
+  "start_url": "/meo-experimental",
   "display": "standalone",
   "background_color": "#1c1c26",
   "lang": "en",
-  "scope": "/",
+  "scope": "/meo-experimental",
   "description": "Neo + Meower",
   "categories": [
-    "entertainment",
-    "social",
-    "utilities"
+    "communication",
+    "chat",
+    "messaging"
   ],
   "orientation": "any",
   "theme_color": "#1c1c26",
@@ -28,9 +28,9 @@
       "purpose": "any"
     },
     {
-      "src": "images/meo.svg",
+      "src": "images/monochrome.svg",
       "type": "image/svg+xml",
-      "sizes": "48x48 72x72 96x96 128x128 256x256",
+      "sizes": "48x48 72x72 96x96 128x128 256x256 512x512",
       "purpose": "monochrome"
     },
     {
@@ -40,6 +40,11 @@
       "purpose": "maskable"
     }
   ],
+  "id": "meov120",
+  "dir": "ltr",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "display_override": [
     "standalone",
     "window-controls-overlay"

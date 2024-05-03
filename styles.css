@@ -1380,14 +1380,16 @@ possible future styling
 }
 
 .cstpgbt {
-    padding: var(--button-padding);
-    margin-top: var(--button-margin);
-    max-width: 100px;
-}
-
-.customcss {
-    display: flex;
-    flex-direction: column;
+    padding: 10px var(--button-padding);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    text-wrap: nowrap;
+    background: var(--accent-color);
+    border-radius: var(--border-radius);
+    margin-top: 5px;
+    font-size: 12px;
+    text-align: left;
 }
 
 .custom-label {
