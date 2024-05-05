@@ -160,6 +160,12 @@ bridge {
     padding-bottom: 1px;
     font-weight: bold;
     color: #fff;
+    user-select: none;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
 }
 
 .launch {
@@ -440,6 +446,7 @@ bridge {
 
 .date {
     margin-left: 5px;
+    user-select: none;
 }
 
 .link {
@@ -451,7 +458,7 @@ bridge {
 
 #main {
     flex: 1;
-    max-width: 800px;
+    max-width: 700px;
     overflow: none;
     height: auto;
     border: var(--border);
@@ -621,25 +628,6 @@ possible future styling
     flex-direction: column;
     align-items: center;
     border-radius: var(--border-radius);
-    transform: scale(0.5);
-    animation: open cubic-bezier(.2,-.25,0,1) 0.2s forwards;
-}
-
-.modal-small {
-    background-color: var(--modal-color);
-    box-shadow: 0px 5px 10px #000;
-    width: 80%;
-    max-width: 400px;
-    max-height: 50%;
-    padding: var(--padding);
-    height: calc(70% + 55px); /* Updated height value */
-    z-index: 1;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: var(--border-radius);
-    transform: scale(0.5);
     animation: open cubic-bezier(.2,-.25,0,1) 0.2s forwards;
 }
 
@@ -676,6 +664,11 @@ possible future styling
 
 .modal-back-btn:active {
     background-color: var(--modal-button-color);
+}
+
+.modal-back-btn:disabled {
+    background-color: var(--modal-button-color);
+    opacity: 0.5;
 }
 
 .modal-button {
@@ -896,6 +889,15 @@ possible future styling
     text-decoration: underline;
     color: #fefefe;
     cursor: pointer;
+}
+
+@keyframes reduced-motion {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes popup {
@@ -1130,7 +1132,6 @@ possible future styling
     max-width: 629px;
     overflow: auto;
     resize: horizontal;
-    transform: translateY(0px);
     animation: slidedown cubic-bezier(.2,-.25,0,1) 0.2s forwards;
 }
 
@@ -1268,17 +1269,6 @@ possible future styling
     margin-bottom: var(--button-margin);
 }
 
-.custom-theme-in {
-    display: flex;
-    flex-direction: column;
-}
-
-.cstmeinp {
-    display: flex;
-    align-items: center;
-    margin: calc(var(--margin)/2);
-}
-
 .titlebar {
     position: fixed;
     left: env(titlebar-area-x, 0);
@@ -1362,7 +1352,7 @@ possible future styling
 }
 
 .example-msg {
-    padding: 25px;
+    padding: 25px 15px;
     height: 200px;
     overflow: hidden;
     border: 1px solid var(--accent-color);
@@ -1391,13 +1381,80 @@ possible future styling
 
 .cstpgbt {
     padding: 1em;
+    margin-right: 2px;
     margin-top: 5px;
     max-width: 100px;
 }
 
-.customcss {
+.custom-label {
+    font-size: 14px;
+    width: 100%;
+    margin: 5px;
+}
+
+.custom-theme-in {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.cstmeinp {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    margin: calc(var(--margin)/2);
+}
+
+.cstcolinpc {
+    border: none;
+    outline: none;
+    height: 24px;
+    width: 75px;
+    padding: 0;
+    margin: 0;
+}
+
+.cstcolinpc::-webkit-color-swatch {
+    border: none;
+}
+
+.post.blocked {
+    position: relative;
+    overflow: hidden;
+}
+  
+.post.blocked::before {
+    content: "hover to view message";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--accent-color);
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.post.blocked:hover::before {
+    opacity: 0;
+}  
+
+.blockeduser, .blockedword {
+    padding: 10px var(--button-padding);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    text-wrap: nowrap;
+    background: var(--accent-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 5px;
+    font-size: 12px;
+    text-align: left;
+}
+
+.credit {
+    margin: 5px;
 }
 
 @media screen and (max-width: 480px) {
@@ -1417,7 +1474,6 @@ possible future styling
         border-top-right-radius: 15px;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-        transform: translateY(-50%);
         animation: popup cubic-bezier(.2,-.25,0,1) 0.2s forwards;
         border: none !important;
     }
@@ -1684,4 +1740,16 @@ possible future styling
     .emoji-button {
         display: none;
     }
+
+    .post.blocked::before {
+        content: "tap to view message";
+    }
+
+    .post.blocked:focus::before {
+        opacity: 0;
+    }  
+}
+
+.reduced-ani.modal, .reduced-ani.image-mdl > .embed-large {
+    animation: reduced-motion cubic-bezier(.2,-.25,0,1) 0.2s forwards;
 }

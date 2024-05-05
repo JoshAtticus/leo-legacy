@@ -100,7 +100,7 @@ function main() {
                         <input type='password' id='passinput' placeholder='Password' class='login-input text' aria-label="password input" autocomplete="current-password">
                         <input type='button' id='login' value='Log in' class='login-input button' onclick='login(document.getElementById("userinput").value, document.getElementById("passinput").value)' aria-label="sign up">
                         <input type='button' id='signup' value='Sign up' class='login-input button' onclick='signup(document.getElementById("userinput").value, document.getElementById("passinput").value)' aria-label="log in">
-                        <small>meo made by eri, leo by JoshAtticus</small>
+                        <small>This client was made by eri :></small>
                         <div id='msgs'></div>
                     </div>
                     <div class='footer'>
@@ -733,7 +733,7 @@ function loadtheme() {
 
 function sharepost() {
     const postId = event.target.closest('.post').id;
-    window.open(`https://leo.atticat.tech/share?id=${postId}`, '_blank');
+    window.open(`https://meo-32r.pages.dev/share?id=${postId}`, '_blank');
 }
 
 function login(user, pass) {
@@ -1203,7 +1203,7 @@ function loadstgs() {
     navc.innerHTML = `
     <input type='button' class='navigation-button button' id='submit' value='General' onclick='loadgeneral()' aria-label="general">
     <input type='button' class='navigation-button button' id='submit' value='Appearance' onclick='loadappearance()' aria-label="appearance">
-    <input type="button" class="navigation-button button" id="submit" value="Plugins (Beta)" onclick="loadplugins()" aria-label="plugins">
+    <input type="button" class="navigation-button button" id="submit" value="Plugins" onclick="loadplugins()" aria-label="plugins">
     <input type='button' class='navigation-button button' id='logout' value='Logout' onclick='logout(false)' aria-label="logout">
     `;
     loadgeneral();
@@ -1303,7 +1303,7 @@ function loadgeneral() {
             </div>
             <h3>About</h3>
             <div class="stg-section">
-            <span>leo v1.2.0</span>
+            <span>meo v1.2.0</span>
             </div>
             <h3>Credits</h3>
             <div class="stg-section">
@@ -1398,8 +1398,7 @@ async function loadplugins() {
     let pageContainer = document.getElementById("main");
     let settingsContent = `
         <div class="settings">
-            <h1>Plugins (Beta)</h1>
-            <h3>May require a refresh upon enabling/disabling</h3>
+            <h1>Plugins</h1>
             <div class="msgs"></div>
             <div class='plugins'>
     `;
@@ -1410,9 +1409,9 @@ async function loadplugins() {
         const isEnabled = localStorage.getItem(plugin.name) === 'true';
 
         settingsContent += `
-            <div class='plugin'>
+            <div class='section plugin'>
                 <h3>${plugin.name}</h3>
-                <i class='desc'>Created by <a href='https://github.com/${plugin.creator}'>${plugin.creator}</a> | Installs from ${plugin.source}</i>
+                <i class='desc'>Created by <a href='https://github.com/${plugin.creator}'>${plugin.creator}</a></i>
                 <p class='desc'>${plugin.description}</p>
                 <label>
                     enable
@@ -1424,11 +1423,11 @@ async function loadplugins() {
 
     settingsContent += `
         </div>
-            <h1>Custom Plugin</h1>
-            <h3>Caution: can be very dangerous</h3>
-            <div class='customplugin'>
-                <textarea class="editor" id='customplugininput' placeholder="// create plugin here"></textarea>
-                <input class='cstpgbt' type='button' value='Run' onclick="customplugin()">
+            <h3>Custom Plugin</h3>
+            <p>Caution: can be very dangerous</p>
+            <div class='customcss'>
+                <textarea class="editor" id='customplugininput' placeholder="// you put stuff here"></textarea>
+                <button class='cstpgbt button' onclick="customplugin()">Run</button>
             </div>
         </div>
     `;
@@ -1436,7 +1435,7 @@ async function loadplugins() {
 
     pluginsdata.forEach(plugin => {
         const checkbox = document.getElementById(plugin.name);
-        checkbox.addEventListener('change', function () {
+        checkbox.addEventListener('change', function() {
             if (checkbox.checked) {
                 localStorage.setItem(plugin.name, 'true');
                 loadpluginscript(plugin.script);
@@ -1446,8 +1445,6 @@ async function loadplugins() {
         });
     });
 }
-
-
 
 function loadpluginscript(scriptUrl) {
     const script = document.createElement('script');
@@ -1460,7 +1457,7 @@ async function fetchplugins() {
     try {
     // remember to bring this back when final
     //    const response = await fetch('./plugins.json');
-        const response = await fetch('plugins.json');
+        const response = await fetch('https://meo-32r.pages.dev/plugins.json');
         const pluginsdata = await response.json();
         return pluginsdata;
     } catch (error) {
@@ -1696,11 +1693,9 @@ function loadappearance() {
                     <input type="color" class="cstcolinpc" id="hov-modal-button-color" name="hov-modal-button-color" value="#4d576a">
                     </div>
                 </div>
-                <span>
-                    <button onclick="applyCustomTheme()" class="cstpgbt button">Apply</button>
-                    <button onclick="saveCustomTheme()" class="cstpgbt button">Save Theme</button>
-                    <button onclick="loadCustomThemeFile()" class="cstpgbt button">Load Theme</button>
-                </span>
+                <button onclick="applyCustomTheme()" class="cstpgbt button">Apply</button>
+                <button onclick="saveCustomTheme()" class="cstpgbt button">Save Theme</button>
+                <button onclick="loadCustomThemeFile()" class="cstpgbt button">Load Theme</button>
 
             </div>
         <h3>Custom CSS</h3>
@@ -2158,46 +2153,6 @@ function openUsrModal(uId) {
             mdbt.innerHTML = ``;
         }
     }
-}
-
-function uploadModal() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = ".jpg,.jpeg,.png,.bmp,.gif,.tif,.webp,.heic,.avif";
-    input.multiple = true;
-    input.click();
-
-    input.onchange = function(e) {
-        const files = Array.from(e.target.files);
-        if (files.some(file => file.size > 32 * 1024 * 1024)) {
-            errorModal("File too large", "Please upload files smaller than 32MB.");
-            return;
-        }
-
-        const textarea = document.querySelector('.message-input.text');
-        textarea.placeholder = `Uploading ${files.length} ${files.length > 1 ? 'images' : 'image'}...`;
-
-        const uploads = files.map(file => {
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('username', leo.meower.getusername());
-
-            return fetch('https://leoimages.atticat.tech/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => data.image_url) // Just return the URL
-            .catch(error => errorModal("Error uploading image", error));
-        });
-
-        Promise.all(uploads).then(imageUrls => {
-            // Add all the URLs to the textarea
-            textarea.value += imageUrls.join('\n') + '\n';
-            autoresize();
-            textarea.placeholder = "What's on your mind?"; // Reset placeholder
-        });
-    };
 }
 
 function reportModal(id) {
@@ -3107,7 +3062,7 @@ function mdlpingusr(event) {
 
 function mdlshare(event) {
     const postId = event.target.closest('.modal').id;
-    window.open(`https://leo.atticat.tech/share?id=${postId}`, '_blank');
+    window.open(`https://meo-32r.pages.dev/share?id=${postId}`, '_blank');
     closemodal();
 }
 
@@ -3219,7 +3174,7 @@ function createDate(tsmp) {
 }
 
 function uploadImage() {
-    uploadModal();
+    openUpdate("Placeholder!");
 }
 
 function goAnywhere() {
@@ -3501,7 +3456,8 @@ function shareModal() {
             if (mdlt) {
                 mdlt.innerHTML = `
                 <h3>Share</h3>
-                <input id="share" class="mdl-inp" type="text" value="https://leo.atticat.tech/" readonly>
+                <input id="share" class="mdl-inp" type="text" value="https://meo-32r.pages.dev/" readonly>
+                <input id="share" class="mdl-inp" type="text" value="https://eris.pages.dev/meo-experimental/" readonly>
                 `;
             }
             const mdbt = mdl.querySelector('.modal-bottom');

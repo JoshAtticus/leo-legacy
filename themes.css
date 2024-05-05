@@ -458,6 +458,50 @@
     --color-scheme: dark;
 }
 
+.lime-theme {
+    --primary: #93c384;
+    --secondary: #cbffb8;
+    --background: #f8fbf1;
+    --color: #4b6b43;
+    --accent-color: #d7e8cd;
+    --hov-accent-color: #c8e4b9;
+    --hov-color: #d5f0c7;
+    --link-color: #537e3b;
+    --attachment-background-color: #bbf1a9;
+    --attachment-color: #527d39;
+    --attachment-background-color-hover: #537e3b;
+    --attachment-color-hover: #bbf1a9;
+    --button-color: #74a167;
+    --hov-button-color: #3b6930;
+    --modal-color: #f8fbf1;
+    --modal-button-color: #d7e8cd;
+    --hov-modal-button-color: #d5f0c7;
+    
+    --color-scheme: light;
+}
+
+.sage-theme {
+    --primary: #60804e;
+    --secondary: #cbffb8;
+    --background: #0c0e08;
+    --color: #e4ffdd;
+    --accent-color: #2b3526;
+    --hov-accent-color: #4a5b41;
+    --hov-color: #5c7051;
+    --link-color: #bbf1a9;
+    --attachment-background-color: #60804e;
+    --attachment-color: #bbf1a9;
+    --attachment-background-color-hover: #7ea268;
+    --attachment-color-hover: #e4ffdd;
+    --button-color: #a0b794;
+    --hov-button-color: #e4ffdd;
+    --modal-color: #2b3526;
+    --modal-button-color: #4a5b41;
+    --hov-modal-button-color: #5c7051;
+    
+    --color-scheme: light;
+}
+
 .theme-buttons-inner {
     display: flex;
     align-items: center;
@@ -470,12 +514,12 @@
     border-radius: 100%;
     margin: 5px;
     color: var(--color);
-    border: 1px solid var(--background);
+    border: 3px solid var(--accent-color);
     background: var(--background);
     box-shadow: 0px 5px 10px #00000050;
 }
 
 .selected {
-    border: 3px solid var(--accent-color);
+    border: 3px solid var(--primary);
     box-shadow: none;
 }

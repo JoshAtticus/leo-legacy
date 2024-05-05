@@ -30,6 +30,7 @@ if (!false) {
           iframe.setAttribute('allowtransparency','true');
           iframe.setAttribute('allowfullscreen','true');
           iframe.setAttribute('scrolling','no');
+          iframe.setAttribute('title','Tenor GIF');
           var root;
             iframe.setAttribute('style',e.getAttribute('data-style'));
             root = iframe;
