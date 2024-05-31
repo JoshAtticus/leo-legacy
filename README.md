@@ -1,4 +1,7 @@
-# leo
+# leo experimental
+> [!WARNING]
+> This version of leo is discontinued
+
 Meo Experimental with plugins re-enabled :)
 
 ## enhancements over standard meo
