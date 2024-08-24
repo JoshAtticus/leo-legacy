@@ -1,4 +1,4 @@
-# leo experimental
+# leo legacy
 > [!WARNING]
 > This version of leo is discontinued
 
