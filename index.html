@@ -138,13 +138,6 @@
       element.__defineGetter__("id", function() {
           devtoolsOpen = true;
       });
-      setInterval(function() {
-          devtoolsOpen = false;
-          if (!settingsstuff().consolewarnings) {
-            console.log("%c" + "Warning!!", "font-size: 24px; color: red; font-weight: bold;");
-            console.log("Pasting anything in here is dangerous, there be dragons.");
-          }
-      }, 3000);
   </script>
 </body>
 </html>
