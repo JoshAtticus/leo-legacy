@@ -1,6 +1,6 @@
 # leo legacy
 > [!WARNING]
-> This version of leo is discontinued
+> This version of leo is discontinued and may stop functioning soon. A few additional commits have been made to re-enable functionality on older devices & browsers.
 
 Meo Experimental with plugins re-enabled :)
 
