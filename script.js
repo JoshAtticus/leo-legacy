@@ -2048,9 +2048,9 @@ function errorModal(header, text) {
     document.documentElement.style.overflow = "hidden";
 
     const mdlbck = document.querySelector('.modal-back');
-    const mdl = mdlbck?.querySelector('.modal');
-    const mdlt = mdl?.querySelector('.modal-top');
-    const mdbt = mdl?.querySelector('.modal-bottom');
+    const mdl = mdlbck ? mdlbck.querySelector('.modal') : null;
+    const mdlt = mdl ? mdl.querySelector('.modal-top') : null;
+    const mdbt = mdl ? mdl.querySelector('.modal-bottom') : null;
 
     if (mdlbck) mdlbck.style.display = 'flex';
     if (mdlt) mdlt.innerHTML = `<h3>${header}</h3><hr class="mdl-hr"><span class="subheader">${text}</span>`;
